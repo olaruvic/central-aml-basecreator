@@ -11,8 +11,9 @@ class JSON2Array {
     }
     _toArray(page, parentUrl) {
         const nameSearch = page.name;
-        const url = parentUrl + '/' + page.url;
+        const url = parentUrl + '/' + page.url.trim();
         const toPush = {
+            isVanityUrl: false,
             name: nameSearch,
             nameSearch: nameSearch.toLowerCase().replace(/ /gi, ''),
             url: url,
@@ -27,7 +28,12 @@ class JSON2Array {
             subPages: page.subPages,
             subPages2search: JSON.stringify(page.subPages)
         };
-        if (page.url.length != 0 && this._check[url] == null) {
+        let isErr = (page.url.trim().length <= 0 || this._check[url] != null);
+        if (isErr && page.vanity.trim().length > 0) {
+            isErr = false;
+            toPush.isVanityUrl = true;
+        }
+        if (!isErr) {
             this._check[url] = 1;
             this.array.push(toPush);
         }

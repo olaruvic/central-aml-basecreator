@@ -95,6 +95,8 @@ export class ImageSpider
 	//#######################################################################################################
 	run(): void
 	{
+console.log(`${new Debug().shortInfo()} ---------------- exec stopped ----------------`)
+process.exit(1)
 		// process sites
 		this.site_enum_idx = 0
 		//console.log(colors.bgRed.white.bold(`${new Debug().shortInfo()}`), colors.bgRed.black(` :: Habe this._read_next_url() auskommentiert, damit ich this._cleanUp_multipleImages() schneller testen kann (es werden z.Z. keine Bilder heruntergeladen!!!)\n`))

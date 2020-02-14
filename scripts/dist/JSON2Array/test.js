@@ -9,7 +9,7 @@ let json2arr = new JSON2Array_1.JSON2Array(json_data, false);
 let count = 0;
 for (let each of json2arr.array) {
     count += 1;
-    console.log(count.toString().padding_left(4, ' '), '::', each.url);
+    console.log(count.toString().padding_left(4, ' '), '::', (each.isVanityUrl ? each.vanity : each.url));
 }
 console.log('----------------------------');
 for (let each of json2arr.error) {

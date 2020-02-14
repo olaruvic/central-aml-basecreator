@@ -21,8 +21,9 @@ export class JSON2Array
 	private _toArray(page: any, parentUrl: string) 
 	{
 		const nameSearch = page.name;
-		const url = parentUrl + '/' + page.url;
+		const url = parentUrl + '/' + page.url.trim();
 		const toPush = {
+			isVanityUrl: false,
 			name: nameSearch,
 			nameSearch: nameSearch.toLowerCase().replace(/ /gi, ''),
 			url: url, //parentUrl + '/' + page.url,
@@ -37,7 +38,14 @@ export class JSON2Array
 			subPages: page.subPages,
 			subPages2search: JSON.stringify(page.subPages)
 		};
-		if ( page.url.length!=0 && this._check[url]==null )
+		// page.url darf leer sein, wenn es eine Vanity-URL hat
+		let isErr = ( page.url.trim().length<=0 || this._check[url]!=null )
+		if ( isErr && page.vanity.trim().length > 0 )
+		{
+			isErr = false;
+			toPush.isVanityUrl = true;
+		}
+		if ( !isErr )
 		{
 			this._check[url] = 1
 			this.array.push(toPush);

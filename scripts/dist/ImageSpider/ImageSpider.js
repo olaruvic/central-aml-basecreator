@@ -5,6 +5,7 @@ const fs = require("fs");
 const fse = require("fs-extra");
 const path = require("path");
 const colors = require("colors");
+const Debug_1 = require("../Debug/Debug");
 const f2s = require("../FileToString/fileToString");
 const s2f = require("../StringToFile/stringToFile");
 let needle = require('needle');
@@ -59,6 +60,8 @@ class ImageSpider {
         }
     }
     run() {
+        console.log(`${new Debug_1.Debug().shortInfo()} ---------------- exec stopped ----------------`);
+        process.exit(1);
         this.site_enum_idx = 0;
         this._read_next_url();
     }
