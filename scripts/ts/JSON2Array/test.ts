@@ -2,7 +2,7 @@ import root = require('../../../root')
 import colors = require('colors')
 import path = require('path')
 import { JSON2Array } from './JSON2Array';
-const data = require(path.join(root(), "json-data", "juli2020.json"));
+const data = require(path.join(root(), "central-amv-data", "juli2020.json"));
 
 // console.dir(data, {colors: true, depth: 1000})
 let arr = new JSON2Array(data).array

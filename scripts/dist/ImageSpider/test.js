@@ -1,0 +1,10 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const ImageSpider_1 = require("./ImageSpider");
+const path = require("path");
+const root = require("../../../root");
+const cheerio = require('cheerio');
+let json_url_list = path.join(root(), 'central-amv-data', 'url_list.txt');
+let target_path = '/Users/victorolaru/Desktop/test_images';
+let imgSpider = new ImageSpider_1.ImageSpider(json_url_list, target_path);
+console.log(imgSpider.run());
