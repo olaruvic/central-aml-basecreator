@@ -12,52 +12,43 @@ export class CreateFolders
 
 	static exec(target_path: string, json: any, stopExecOnError: boolean)
 	{
-		let cf = new CreateFolders()
-		let error = cf._createFolders(target_path, json, false, false)
-		if ( error.length > 0 )
+		let json2arr = new JSON2Array(json, false)
+		if ( json2arr.error.length > 0 )
 		{
 			console.log(colors.red.bold("Fehler: Mehrfacheinträge gefunden!"))
-			for( let each of error )
+			for( let each of json2arr.error )
 			{
-				console.log(` • ${colors.red(each.path)} => ${colors.red.bold(each.obj.name)}`)
+				console.log(` • ${colors.red(each.url)} => ${colors.red.bold(each.page.name)}`)
 			}
 			if ( stopExecOnError )
 			{
 				process.exit(1)
 			}
 		}
-		cf._createFolders(target_path, json, true, true)
+		let cf = new CreateFolders()
+		cf._createFolders(target_path, json2arr, true)
 	}
 
-	private _createFolders(target_path: string, json: any, createFolders: boolean, log: boolean): Array<any>
+	private _createFolders(target_path: string, json2arr: JSON2Array, log: boolean)
 	{
-		let check = {}
-		let error = []
-		let folder_array = new JSON2Array(json).array
+		let folder_array = json2arr.array
 		let count = 0
 		for(let each of folder_array)
 		{
+			count += 1;
+			//
 			let comps = URL.parse(each.url)
 			let dir = path.join(target_path, comps.host, comps.pathname);
 			if ( !dir.endsWith(path.sep) ) dir += path.sep;
 			//
-			if ( check[dir] == null )
+			if ( log )
 			{
-				check[dir] = 1
-				count += 1
-				if ( log )
-				{
-					let root = ( !target_path.endsWith(path.sep) ? (target_path + path.sep) : target_path )
-					let host = comps.host
-					console.log(colors.white.bold(count.toString().padding_left(4, ' ')), colors.gray(root) + colors.gray.underline(host) + colors.white(comps.pathname));
-				}
-				if ( createFolders ) fse.ensureDirSync(dir);
+				let root = ( !target_path.endsWith(path.sep) ? (target_path + path.sep) : target_path )
+				let host = comps.host
+				console.log(colors.white.bold(count.toString().padding_left(4, ' ')), colors.gray(root) + colors.gray.underline(host) + colors.white(comps.pathname));
 			}
-			else
-			{
-				error.push( {path: dir, obj: each} )
-			}
+			// create path
+			fse.ensureDirSync(dir);
 		}
-		return error
 	}
 }

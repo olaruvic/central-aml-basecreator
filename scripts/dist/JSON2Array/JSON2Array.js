@@ -1,16 +1,21 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 class JSON2Array {
-    constructor(pages) {
+    constructor(pages, resultWithErrorPages) {
         this.array = [];
-        this.toArray(pages, 'http:/');
+        this.error = [];
+        this._check = {};
+        this._resultWithErrorPages = resultWithErrorPages;
+        this._toArray(pages, 'http:/');
+        this._normalize_array();
     }
-    toArray(page, parentUrl) {
+    _toArray(page, parentUrl) {
         const nameSearch = page.name;
+        const url = parentUrl + '/' + page.url;
         const toPush = {
             name: nameSearch,
             nameSearch: nameSearch.toLowerCase().replace(/ /gi, ''),
-            url: parentUrl + '/' + page.url,
+            url: url,
             menu: page.menu,
             tracking: page.tracking,
             vanity: page.vanity,
@@ -22,10 +27,26 @@ class JSON2Array {
             subPages: page.subPages,
             subPages2search: JSON.stringify(page.subPages)
         };
-        this.array.push(toPush);
-        page.subPages.forEach(subPage => {
-            this.toArray(subPage, toPush.url);
-        });
+        if (page.url.length != 0 && this._check[url] == null) {
+            this._check[url] = 1;
+            this.array.push(toPush);
+        }
+        else {
+            this.error.push({ url: url, page: page });
+            if (this._resultWithErrorPages)
+                this.array.push(toPush);
+        }
+        for (let subPage of page.subPages) {
+            this._toArray(subPage, toPush.url);
+        }
+    }
+    _normalize_array() {
+        for (let each of this.array) {
+            let dir = each.url;
+            if (!dir.endsWith('/'))
+                dir += '/';
+            each.url = dir;
+        }
     }
 }
 exports.JSON2Array = JSON2Array;

@@ -1,12 +1,20 @@
 import root = require('../../../root')
 import colors = require('colors')
 import path = require('path')
-import { JSON2Array } from './JSON2Array';
-const data = require(path.join(root(), "central-amv-data", "juli2020.json"));
+import '../String-extensions';
+//
+import { JSON2Array } from '../JSON2Array/JSON2Array';
+const json_data = require(path.join(root(), "central-amv-data", "juli2020.json"));
 
-// console.dir(data, {colors: true, depth: 1000})
-let arr = new JSON2Array(data).array
-for(let each of arr)
+let json2arr = new JSON2Array(json_data, false)
+let count = 0
+for (let each of json2arr.array)
 {
-	console.log(each.url)
+	count += 1
+	console.log(count.toString().padding_left(4, ' '), '::', each.url )
+}
+console.log('----------------------------')
+for (let each of json2arr.error)
+{
+	console.dir(each, {colors: true, depth: 1})
 }
