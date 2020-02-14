@@ -1,0 +1,28 @@
+{
+    "compilerOptions": {
+        "module":"commonjs",
+        "target": "es6",
+        "sourceMap": true,
+        "removeComments": true
+    },
+    "exclude": [
+        "dist",
+        "models",
+        "node_modules",
+        "ts_dist",
+        "ts_dist/*.*",
+        "ts_dist/**",
+        "ts_dist/**/*.*",
+        "*.d.ts",
+        "typings/browser.d.ts",
+        "typings/browser/**",
+        "typings/main",
+        "typings/main.d.ts",
+        "typings/index.d.ts"
+    ],
+    "moduleResolution": "node",
+    "npm-intellisense.importES6": true,
+	"npm-intellisense.importQuotes": "'",
+	"npm-intellisense.importLinebreak": ";\r\n",
+	"npm-intellisense.importDeclarationType": "const"
+}
