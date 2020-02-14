@@ -1,0 +1,2 @@
++ img.alt-Tags speichern   =>  <image_name>.alt.txt
++ page.description (Meta-Tags) speichern

@@ -9,6 +9,12 @@ import s2f = require('../StringToFile/stringToFile')
 let needle = require('needle')
 let cheerio = require('cheerio')
 let _url = require('url')
+import { JSON2Array } from '../JSON2Array/JSON2Array';
+import { CreateFolders } from '../CreateFolders/CreateFolders';
+import '../String-extensions';
+
+
+const EMPTY = '--empty--';
 
 
 enum ImageDownloadDataSourceType
@@ -23,18 +29,30 @@ class ImageDownloadData
 	source_url: string
 	source_type_str: string
 	raw_image_url: string
+	image_name_ext: string
 	origin: string
 	target_path: string
 	target_path_subdir: string
 	tmp_dirName: string
 
-	constructor(sourceType: ImageDownloadDataSourceType, css_file_url: string, source_url: string, source_type_str: string, raw_image_url: string, origin: string, target_path: string, target_path_subdir: string, tmp_dirName: string)
+	constructor(	sourceType: ImageDownloadDataSourceType, 
+					css_file_url: string, 
+					source_url: string, 
+					source_type_str: string, 
+					raw_image_url: string, 
+					image_name_ext: string, 
+					origin: string, 
+					target_path: string, 
+					target_path_subdir: string, 
+					tmp_dirName: string
+					)
 	{
 		this.source_type = sourceType
 		this.css_file_url = css_file_url
 		this.source_url = source_url
 		this.source_type_str = source_type_str
 		this.raw_image_url = raw_image_url
+		this.image_name_ext = image_name_ext
 		this.origin = origin
 		this.target_path = target_path
 		this.target_path_subdir = target_path_subdir
@@ -45,9 +63,10 @@ class ImageDownloadData
 
 export class ImageSpider
 {
+	json_data: any
 	target_path: string
-	url_list: Array<string> = []
-	image_dictionary: {[image_fname: string]: number} = {}
+	url_list: Array<any> = []
+	image_dictionary: {[url: string]: number} = {}
 
 	private site_enum_idx : number
 	private downloadImages_list: Array<ImageDownloadData>
@@ -58,28 +77,30 @@ export class ImageSpider
 	private downloadCssImage_callback: ()=> void = null
 
 	//#######################################################################################################
-	constructor(url_list: string, image_target_path: string) 
+	constructor(image_target_path: string, json_data: any, ignore_generali_domains: boolean) 
 	{
+		this.json_data = json_data
 		this.target_path = image_target_path
-		this.url_list = null
+		// this.url_list = null
+		this.url_list = this._create_url_list(image_target_path, json_data, true)
 
-		if (typeof(url_list)=='undefined' || url_list==null || url_list=='' )
-		{
-			console.log(colors.bgRed.white.bold(`Error: Parameter ${colors.underline('url_list')} required!\n`))
-			process.exit(1)
-		}
-		if ( fs.existsSync(url_list) == false )
-		{
-			console.log(colors.bgRed.white.bold(`Error: JSON File '${url_list}' does not exists!\n`))
-			process.exit(1)
-		}
-		let urlList = f2s.fileToString(url_list, true).trim()
-		if ( typeof(urlList)=='undefined' || urlList==null && urlList=='' )
-		{
-			console.log(colors.bgRed.white.bold(`Error: JSON File '${urlList}' is empty!\n`))
-			process.exit(1)		
-		}
-		this.url_list = urlList.split(/[\n\r]/igm).filter(r=>r!=='')
+		// if (typeof(url_list)=='undefined' || url_list==null || url_list=='' )
+		// {
+		// 	console.log(colors.bgRed.white.bold(`Error: Parameter ${colors.underline('url_list')} required!\n`))
+		// 	process.exit(1)
+		// }
+		// if ( fs.existsSync(url_list) == false )
+		// {
+		// 	console.log(colors.bgRed.white.bold(`Error: JSON File '${url_list}' does not exists!\n`))
+		// 	process.exit(1)
+		// }
+		// let urlList = f2s.fileToString(url_list, true).trim()
+		// if ( typeof(urlList)=='undefined' || urlList==null && urlList=='' )
+		// {
+		// 	console.log(colors.bgRed.white.bold(`Error: JSON File '${urlList}' is empty!\n`))
+		// 	process.exit(1)		
+		// }
+		// this.url_list = urlList.split(/[\n\r]/igm).filter(r=>r!=='')
 
 		if (typeof(image_target_path)=='undefined' || image_target_path==null || image_target_path=='' )
 		{
@@ -95,8 +116,7 @@ export class ImageSpider
 	//#######################################################################################################
 	run(): void
 	{
-console.log(`${new Debug().shortInfo()} ---------------- exec stopped ----------------`)
-process.exit(1)
+		console.log(colors.red.bold("######################################################### INFO | processing URLs"))
 		// process sites
 		this.site_enum_idx = 0
 		//console.log(colors.bgRed.white.bold(`${new Debug().shortInfo()}`), colors.bgRed.black(` :: Habe this._read_next_url() auskommentiert, damit ich this._cleanUp_multipleImages() schneller testen kann (es werden z.Z. keine Bilder heruntergeladen!!!)\n`))
@@ -107,13 +127,82 @@ process.exit(1)
 	}
 
 	//#######################################################################################################
+	private _create_url_list(target_path: string, json: any, ignore_generali_domains: boolean): Array<any>
+	{
+		let url2path = CreateFolders.url2path(target_path, json, false)
+		let result = []
+		let domain = {}
+		for (let each_path in url2path)
+		{
+			let page:any = url2path[each_path]
+			// console.log(colors.yellow(each_path))
+			for (let each_url of page.content.sourceUrl)
+			{
+				let url = each_url.trim()
+				if ( url.length <= 0 ) 
+				{
+					if ( domain[EMPTY] == null ) domain[EMPTY] = []
+					// domain[EMPTY].push( {path: each_path, page_name: page.name} )
+					domain[EMPTY].push( {path: page.url, page_name: page.name} )
+					continue;
+				}
+				if ( !url.endsWith('/') ) url += '/';
+				
+				let comps = new _url.URL(url)
+				if ( ignore_generali_domains && /generali/i.test(comps.host) )
+				{
+					continue;
+				}
+				
+				result.push( {target_path: each_path, url: url, page: page} )
+				domain[comps.host] = ( domain[comps.host] == null ? 1 : (domain[comps.host]+1) )
+			}
+		}
+	
+		console.log(colors.red.bold("######################################################### INFO | number of urls"))
+		let max_len = 0
+		for (let host in domain)
+		{
+			if ( host.length > max_len ) max_len = host.length
+		}
+		for (let host in domain)
+		{
+			if ( typeof(domain[host]) == 'number' )
+			{
+				console.log(colors.white.bold(host.padding_right(max_len)), ':', colors.yellow.bold(domain[host].toString().padding_left(3)), 'links')
+			}
+			else
+			{
+				console.log(colors.white.bold(host.padding_right(max_len)), ':', colors.yellow.bold(domain[host].length.toString().padding_left(3)), 'links')
+			}
+		}
+		if ( domain[EMPTY].length > 0 )
+		{
+			console.log(colors.red.bold('\nempty URLs:'))
+			max_len = 0
+			for (let each of domain[EMPTY])
+			{
+				if ( each.page_name.length > max_len ) max_len = each.page_name.length;
+			}
+			let count = 0
+			for (let each of domain[EMPTY])
+			{
+				count += 1
+				console.log(count.toString().padding_left(4), ':', colors.white.bold(each.page_name.padding_right(max_len)), '=>', colors.gray(each.path))
+			}
+		} 
+
+		return result
+	}
+
+	//#######################################################################################################
 	private _read_next_url(): void
 	{
 		let _this = this
 		// let timeout = ( this.site_enum_idx <= 0 ? 1 : (this.site_enum_idx % 5 == 0 ? 5000 : 1) )
 		// let timeout = ( this.site_enum_idx <= 0 ? 1 : 4000 )
 		let timeout = 1
-		console.log(colors.cyan.bold((this.site_enum_idx <= 0 ? 1 : this.site_enum_idx) + " of " + this.url_list.length))
+		// console.log(colors.cyan.bold((this.site_enum_idx <= 0 ? 1 : this.site_enum_idx) + " of " + this.url_list.length))
 		setTimeout(() => {
 			_this._delayed__read_next_url()
 		}, timeout);
@@ -123,26 +212,27 @@ process.exit(1)
 		const _this = this
 
 		// get next URL
-		let url = null
-		while ( url==null && this.site_enum_idx<this.url_list.length ) 
+		let url_data = null
+		while ( url_data==null && this.site_enum_idx<this.url_list.length ) 
 		{
-			url = this.url_list[this.site_enum_idx]
+			url_data = this.url_list[this.site_enum_idx]
 			this.site_enum_idx += 1
-			if ( url.match(/^\s*(\/{2,}|#)/i) != null )		// ignore comments := '// ...', '# ...'
-			{
-				url = null
-			}
+			// if ( url_data.match(/^\s*(\/{2,}|#)/i) != null )		// ignore comments := '// ...', '# ...'
+			// {
+			// 	url_data = null
+			// }
 		}
-		if ( url != null )
+		if ( url_data != null )
 		{
 			//--------------------------------------
 			// process next site
 			//--------------------------------------
+			console.log(colors.cyan.bold((this.site_enum_idx <= 0 ? 1 : this.site_enum_idx) + " of " + this.url_list.length), ':', url_data.url)
 			// get images from URL
-			needle.get(url, function(err, res, body) {
+			needle.get(url_data.url, function(err, res, body) {
 				if ( !err ) 
 				{  
-					_this._html_getImageSources(url, body, function() { _this._read_next_url() })
+					_this._html_getImageSources(url_data, body, function() { _this._read_next_url() })
 				}
 				else
 				{
@@ -156,8 +246,11 @@ process.exit(1)
 			// all sites processed, then clean up image folders
 			// clean-up: move all images that occur multiple times (all sites) in the global folder
 			//--------------------------------------
-			new CleanUpFolders(this.target_path).run('css', 'global_css', 1)
-			new CleanUpFolders(this.target_path).run('images', 'global_images', 5)
+			let cleanUpFolders = new CleanUpFolders(this.target_path)
+				cleanUpFolders.run('css', path.join(this.json_data.url, '_global_css_images'), 5)
+				cleanUpFolders.cleanUp_emptyFolders('css')
+				cleanUpFolders.run('images', path.join(this.json_data.url, '_global_images'), 5)
+				cleanUpFolders.cleanUp_emptyFolders('images')
 		}
 	}
 
@@ -189,7 +282,7 @@ process.exit(1)
 	}
 
 	//#######################################################################################################
-	private _html_getImageSources(url: string, html_body: string, callback: ()=>void = null)
+	private _html_getImageSources(url_data: any, html_body: string, callback: ()=>void = null)
 	{
 		const $ = cheerio.load(html_body, {
 			/*xml: {
@@ -198,16 +291,16 @@ process.exit(1)
 		})
 
 		let _this = this
-		let url_obj = new _url.URL(url)
+		let url_obj = new _url.URL(url_data.url)
 		let origin = url_obj.origin
 		// let current_host_name = url_obj.hostname
 		let __tmp_host = url_obj.host.replace(/\./ig, '_')
 		let __tmp_dirName = url_obj.pathname.replace(/^(\/|\\)/ig, '').replace(/(\/|\\)$/ig, '').replace(/(\/|\\)/ig, '---').replace(/\./ig, '_')
 		let __tmp_target_dirName = __tmp_host + '---' + __tmp_dirName
-		let target_path = path.join(this.target_path, __tmp_target_dirName)
+		let target_path = path.join(url_data.target_path, '_content', __tmp_target_dirName)
 
 		// create source.url file
-		this._createSourceURLFile(target_path, url)
+		this._createSourceURLFile(target_path, url_data.url)
 
 		// init. list enum
 		this.downloadImages_list = []
@@ -220,18 +313,29 @@ process.exit(1)
 			//---------------------------- process 'img.data-responsive-image' attribute
 			if ( ($(this).attr())['data-responsive-image'] )
 			{
-				console.log(colors.yellow("--------"+i+`: ${colors.red.bold('CURRENTLY NO ACTION for')} data-responsive-image=`), ($(this).attr())['data-responsive-image'])
+				// console.log(colors.yellow("--------"+i+`: ${colors.red.bold('CURRENTLY NO ACTION for')} data-responsive-image=`), ($(this).attr())['data-responsive-image'])
+				let img_src = JSON.parse( ($(this).attr())['data-responsive-image'] );
+				for (let each_ratio in img_src)
+				{
+					let ratio_data = img_src[each_ratio];
+					for (let each_size in ratio_data)
+					{
+						let orig_src = ratio_data[each_size];
+						let src_name_ext = `---${each_ratio}---${each_size}`
+						_this.downloadImages_list.push(new ImageDownloadData(ImageDownloadDataSourceType.img, null, url_data.url, '.img ', orig_src, src_name_ext, origin, target_path, 'images', __tmp_dirName))
+					}
+				}
 			}
 			//---------------------------- process 'img.src' attribute
 			else if ( $(this).attr().src.trim().length > 0 )
 			{
 				//_this._copyImage(url, '.img ', $(this).attr().src, origin, target_path, 'images', __tmp_dirName)
-				_this.downloadImages_list.push(new ImageDownloadData(ImageDownloadDataSourceType.img, null, url, '.img ', $(this).attr().src, origin, target_path, 'images', __tmp_dirName))
+				_this.downloadImages_list.push(new ImageDownloadData(ImageDownloadDataSourceType.img, null, url_data.url, '.img ', $(this).attr().src, null, origin, target_path, 'images', __tmp_dirName))
 			}
 			//---------------------------- process UNKNOWN: if 'img' tag does not contain 'src' or 'data-responsive-image' attribute
 			else
 			{
-				console.log(colors.bgRed("--------"+i+" :: UNKNOWN: "), $(this).attr())
+				console.log(colors.bgRed("--------"+i+" :: UNKNOWN.img: "), $(this).attr())
 			}
 		})
 
@@ -252,16 +356,20 @@ process.exit(1)
 						}
 					});
 					*/
-					_this.downloadImages_list.push(new ImageDownloadData(ImageDownloadDataSourceType.css, href, url, '.link', null, origin, target_path, null, __tmp_dirName))
+					_this.downloadImages_list.push(new ImageDownloadData(ImageDownloadDataSourceType.css, href, url_data.url, '.link', null, null, origin, target_path, null, __tmp_dirName))
 				}
 				else
 				{
 					console.log(colors.bgRed("--------"+i+" :: external URL: "), attrs)	
 				}
 			}
+			else if ( attrs.rel.trim().toLowerCase()=='canonical' && attrs.href.length>0 )
+			{
+				// ignore link.rel="canonical"
+			}
 			else
 			{
-				console.log(colors.bgRed("--------"+i+" :: UNKNOWN: "), attrs)
+				console.log(colors.bgRed("--------"+i+" :: UNKNOWN.css: "), attrs)
 			}
 		})
 
@@ -305,6 +413,7 @@ process.exit(1)
 						nextImg.source_url, 
 						nextImg.source_type_str, 
 						nextImg.raw_image_url, 
+						nextImg.image_name_ext,
 						nextImg.origin, 
 						nextImg.target_path, 
 						nextImg.target_path_subdir, 
@@ -394,7 +503,7 @@ process.exit(1)
 			if ( m[0].match(/(\/\*|\/\/)/i) == null )	// process string, if does not start with '/*' or '//'
 			{
 				//this._copyImage(source_url, source_type, m[1], origin, target_path, 'css', __tmp_dirName, callback)
-				this.downloadCssImage_list.push(new ImageDownloadData(ImageDownloadDataSourceType.css, null, source_url, source_type, m[1], origin, target_path, 'css', __tmp_dirName))
+				this.downloadCssImage_list.push(new ImageDownloadData(ImageDownloadDataSourceType.css, null, source_url, source_type, m[1], null, origin, target_path, 'css', __tmp_dirName))
 			}
 /*			m.forEach((match, groupIndex) => {
 				console.log(colors.red(`Found match, group ${groupIndex}: ${match}`))
@@ -430,6 +539,7 @@ process.exit(1)
 				nextImg.source_url, 
 				nextImg.source_type_str, 
 				nextImg.raw_image_url, 
+				nextImg.image_name_ext,
 				nextImg.origin, 
 				nextImg.target_path, 
 				nextImg.target_path_subdir, 
@@ -464,17 +574,23 @@ process.exit(1)
 		source_url: string, 
 		source_type: string, 
 		raw_image_url: string, 
+		image_name_ext: string,
 		origin: string, 
 		target_path: string, 
 		target_path_subdir: string, 
 		__tmp_dirName: string, 
 		callback: ()=>void
 		)
-	{	
+	{
 		let _this = this
 		let imageURL = this._checkAndFormatLocalURL(raw_image_url, origin)
 		let comps = path.parse(imageURL)
 		let image_fname = decodeURIComponent(comps.base)
+		if ( typeof(image_name_ext)!='undefined' && image_name_ext!=null )
+		{
+			let comps_fname = path.parse(image_fname)
+			image_fname = comps_fname.name + '---' + image_name_ext + comps_fname.ext
+		}
 		let full_targetPath = ( typeof(target_path_subdir)!='undefined' && target_path_subdir!=null && target_path_subdir.trim().length > 0
 			? path.join(target_path, target_path_subdir)
 			: target_path
@@ -501,7 +617,7 @@ process.exit(1)
 					? path.sep+target_path_subdir
 					: ''
 				)
-				console.log(`         target${colors.yellow(source_type)} = ${colors.green(_this.target_path)}${colors.green.bold(__tmp_dirName)}${colors.cyan(addSubDir)}${colors.green(path.sep+image_fname)}`)
+				console.log(`         target${colors.yellow(source_type)} = ${colors.green(_this.target_path+path.sep)}${colors.green.bold(__tmp_dirName)}${colors.cyan(addSubDir)}${colors.green(path.sep+image_fname)}`)
 			}
 			else
 			{

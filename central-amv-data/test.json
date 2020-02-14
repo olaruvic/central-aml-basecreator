@@ -1,0 +1,42 @@
+{
+    "name":"generali.de",
+    "url": "generali.de",
+    "menu": false,
+    "tracking":"",
+    "vanity":"",
+    "notes":"In die Bühne kommen evtl. Teaser für Gesundheit & Pflege.",
+    "content":{
+        "sourceUrl":[
+            ""]
+    },
+    "template":"",
+       "redirects":{
+        "aml":[],
+        "central":["https://www.central.de/",
+                   "https://www.amv.de/"]
+    },
+    "subPages": [
+        {
+			"name":"Gesundheit & Pflege",
+			"url": "gesundheit-pflege",
+			"menu": true,
+			"tracking":"",
+			"vanity":"",
+			"notes":"",
+			"content":{
+				"sourceUrl":[
+					"https://www.central.de/produkte/vollversicherung/"]
+			},
+			"template":"Verteiler",
+			"redirects":{
+				"aml":[],
+				"central":[
+					"https://www.central.de/produkte/vollversicherung/",
+					"https://www.central.de/produkte/zusatzversicherung/"]
+			},
+            "subPages": [
+            ]
+        }
+    ]
+}
+

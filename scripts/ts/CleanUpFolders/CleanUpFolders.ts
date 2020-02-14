@@ -108,4 +108,22 @@ export class CleanUpFolders
 			}
 		}
 	}
+
+	cleanUp_emptyFolders(subDir_name: string)
+	{
+		let css_folders = glob.sync(path.join(this.target_path, '**', subDir_name), {
+			'mark': true, 							// Add a '/' character to directory matches
+			'dot': false, 							// alle Dateien die mit '.' anfangen ignorieren, z.B. '.DS_Store'
+			'ignore': [path.join('**','.*')]		// da 'dot' = false (default), müssen '**/.*' nicht mehr explizit ignoriert werden - habe es nur als Platzhalter eingebaut, falls später irgendwelche Dateien noch ignoriert werden müssen
+		})
+		for (let each of css_folders)
+		{
+			let num_files = fs.readdirSync(each).length
+			if ( num_files <= 0 )
+			{
+				console.log(colors.grey(`remove folder : `), each)
+				fs.rmdirSync(each)
+			}
+		}
+	}
 }

@@ -15,15 +15,18 @@ class CreateFolders {
         if (json2arr.error.length > 0) {
             console.log(colors.red.bold("---------------------------------------------- Fehlerhafte Einträge"));
             for (let each of json2arr.error) {
-                console.log(` • ${colors.red(each.url)} => ${colors.red.bold(each.page.name)}${' | ' + (each.page.notes.trim().length > 0 ? each.page.notes : 'no notes')}`);
+                console.log(` • ${colors.red(each.url)} => ${colors.red.bold(each.page.name)}`);
+                console.log(`   ${colors.white.bold("NOTES")}: ${(each.page.notes.trim().length > 0 ? each.page.notes : 'no notes')}`);
+                console.dir(each.page.content.sourceUrl, { colors: true });
+                console.log(colors.red.bold("----------------------------------------------"));
             }
             console.log();
         }
     }
-    static url2path(target_path, json) {
+    static url2path(target_path, json, log) {
         let json2arr = new JSON2Array_1.JSON2Array(json, false);
         let cf = new CreateFolders();
-        return cf._createFolders(target_path, json2arr, true, false);
+        return cf._createFolders(target_path, json2arr, false, false);
     }
     _createFolders(target_path, json2arr, log, createFolders) {
         let folder_array = json2arr.array;
@@ -41,7 +44,6 @@ class CreateFolders {
                 if (log) {
                     console.log(colors.white.bold(count.toString().padding_left(4, ' ')), colors.yellow.bold(dir));
                 }
-                url2path[each.vanity] = dir;
             }
             else {
                 let comps = URL.parse(each.url);
@@ -51,9 +53,11 @@ class CreateFolders {
                 if (log) {
                     console.log(colors.white.bold(count.toString().padding_left(4, ' ')), colors.white(dir));
                 }
-                url2path[each.url] = dir;
             }
-            fse.ensureDirSync(dir);
+            url2path[dir] = each;
+            if (createFolders) {
+                fse.ensureDirSync(dir);
+            }
         }
         return url2path;
     }

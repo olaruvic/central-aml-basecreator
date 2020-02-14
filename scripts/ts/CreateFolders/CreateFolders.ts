@@ -22,21 +22,24 @@ export class CreateFolders
 			console.log(colors.red.bold("---------------------------------------------- Fehlerhafte Einträge"))
 			for( let each of json2arr.error )
 			{
-				console.log(` • ${colors.red(each.url)} => ${colors.red.bold(each.page.name)}${' | '+(each.page.notes.trim().length > 0 ? each.page.notes : 'no notes')}`)
+				console.log(` • ${colors.red(each.url)} => ${colors.red.bold(each.page.name)}`)
+				console.log(`   ${colors.white.bold("NOTES")}: ${(each.page.notes.trim().length > 0 ? each.page.notes : 'no notes')}`)
+				console.dir(each.page.content.sourceUrl, {colors: true})
+				console.log(colors.red.bold("----------------------------------------------"))
 			}
 			console.log();
 		}
 	}
 
-	static url2path(target_path: string, json: any): {[url: string]: string}
+	static url2path(target_path: string, json: any, log: boolean): {[url: string]: string}
 	{
 		let json2arr = new JSON2Array(json, false)
 		//
 		let cf = new CreateFolders()
-		return cf._createFolders(target_path, json2arr, true, false)
+		return cf._createFolders(target_path, json2arr, false, false)
 	}
 
-	private _createFolders(target_path: string, json2arr: JSON2Array, log: boolean, createFolders: boolean): {[url: string]: string}
+	private _createFolders(target_path: string, json2arr: JSON2Array, log: boolean, createFolders: boolean): {[target_path: string]: any}
 	{
 		let folder_array = json2arr.array
 		let count = 0
@@ -58,8 +61,6 @@ export class CreateFolders
 				{
 					console.log(colors.white.bold(count.toString().padding_left(4, ' ')), colors.yellow.bold(dir));
 				}
-				//
-				url2path[each.vanity] = dir;
 			}
 			else
 			{
@@ -71,11 +72,14 @@ export class CreateFolders
 				{
 					console.log(colors.white.bold(count.toString().padding_left(4, ' ')), colors.white(dir));
 				}
-				//
-				url2path[each.url] = dir;
 			}
+			// save result path
+			url2path[dir] = each;
 			// create path
-			fse.ensureDirSync(dir);
+			if ( createFolders )
+			{
+				fse.ensureDirSync(dir);
+			}
 		}
 		return url2path
 	}

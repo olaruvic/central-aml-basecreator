@@ -67,5 +67,19 @@ class CleanUpFolders {
             }
         }
     }
+    cleanUp_emptyFolders(subDir_name) {
+        let css_folders = glob.sync(path.join(this.target_path, '**', subDir_name), {
+            'mark': true,
+            'dot': false,
+            'ignore': [path.join('**', '.*')]
+        });
+        for (let each of css_folders) {
+            let num_files = fs.readdirSync(each).length;
+            if (num_files <= 0) {
+                console.log(colors.grey(`remove folder : `), each);
+                fs.rmdirSync(each);
+            }
+        }
+    }
 }
 exports.CleanUpFolders = CleanUpFolders;
