@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const root = require("../../root");
+const root = require("../../../root");
 const path = require("path");
 const JSON2Array_1 = require("./JSON2Array");
 const data = require(path.join(root(), "json-data", "juli2020.json"));

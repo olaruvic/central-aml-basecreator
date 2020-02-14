@@ -1,7 +1,7 @@
 import { TextExtract } from './TextExtract'
 import colors = require('colors')
 import path = require('path')
-import root = require('../../root')
+import root = require('../../../root')
 
 let output_fpath = path.join('/Users', 'victorolaru', 'Desktop', 'text.json')
 let es = new TextExtract(output_fpath)

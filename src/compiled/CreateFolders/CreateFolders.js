@@ -39,7 +39,7 @@ class CreateFolders {
                     console.log(colors.white.bold(this._formatStr(count, 4)), colors.gray(root) + colors.white(comps.pathname));
                 }
                 if (createFolders)
-                    fse.mkdirsSync(dir);
+                    fse.ensureDirSync(dir);
             }
             else {
                 error.push({ path: dir, obj: each });

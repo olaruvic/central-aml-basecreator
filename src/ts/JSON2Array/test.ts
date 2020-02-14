@@ -1,4 +1,4 @@
-import root = require('../../root')
+import root = require('../../../root')
 import colors = require('colors')
 import path = require('path')
 import { JSON2Array } from './JSON2Array';

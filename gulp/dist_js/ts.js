@@ -8,13 +8,13 @@ const minify = require('gulp-minify');
 const tsProject = ts.createProject(path.join(root(),'config','ts_project.json'));
 
 const folders = {
-    gulp: { 
-        watch: path.join('gulp','ts_src','**','*.ts'), 
-        dist: path.join('gulp','dist_js','**','*.ts') 
-    },
+    // gulp: { 
+    //     watch: path.join('gulp','ts','**','*.ts'), 
+    //     dist: path.join('gulp','dist_js','**','*.ts') 
+    // },
     ts: {
-        watch: path.join('ts_src','**','*.ts'),
-        dist: path.join('ts_dist','**','*.js') 
+        watch: path.join('src','ts','**','*.ts'),
+        dist: path.join('src','compiled','**','*.js') 
     }
 };
 

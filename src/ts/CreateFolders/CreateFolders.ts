@@ -1,4 +1,4 @@
-import root = require('../../root')
+import root = require('../../../root')
 import colors = require('colors')
 import path = require('path')
 import { JSON2Array } from '../JSON2Array/JSON2Array';
@@ -49,7 +49,7 @@ export class CreateFolders
 					let root = path.join(target_path, comps.host)
 					console.log(colors.white.bold(this._formatStr(count, 4)), colors.gray(root) + colors.white(comps.pathname));
 				}
-				if ( createFolders ) fse.mkdirsSync(dir);
+				if ( createFolders ) fse.ensureDirSync(dir);
 			}
 			else
 			{
