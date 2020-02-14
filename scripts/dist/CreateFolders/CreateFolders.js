@@ -36,8 +36,9 @@ class CreateFolders {
                 check[dir] = 1;
                 count += 1;
                 if (log) {
-                    let root = path.join(target_path, comps.host);
-                    console.log(colors.white.bold(count.toString().padding_left(4, ' ')), colors.gray(root) + colors.white(comps.pathname));
+                    let root = (!target_path.endsWith(path.sep) ? (target_path + path.sep) : target_path);
+                    let host = comps.host;
+                    console.log(colors.white.bold(count.toString().padding_left(4, ' ')), colors.gray(root) + colors.gray.underline(host) + colors.white(comps.pathname));
                 }
                 if (createFolders)
                     fse.ensureDirSync(dir);
