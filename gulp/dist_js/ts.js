@@ -5,7 +5,7 @@ const root = require('../../root');
 const colors = require('colors/safe');
 const minify = require('gulp-minify');
 
-const tsProject = ts.createProject(path.join(root(),'config','ts_project.json'));
+const tsProject = ts.createProject(path.join(root(),'scripts','_config','ts_project.json'));
 
 const folders = {
     // gulp: { 
@@ -13,8 +13,8 @@ const folders = {
     //     dist: path.join('gulp','dist_js','**','*.ts') 
     // },
     ts: {
-        watch: path.join('src','ts','**','*.ts'),
-        dist: path.join('src','compiled','**','*.js') 
+        watch: path.join('scripts','ts','**','*.ts'),
+        dist: path.join('scripts','dist','**','*.js') 
     }
 };
 
