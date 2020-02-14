@@ -4,6 +4,7 @@ import path = require('path')
 import { JSON2Array } from '../JSON2Array/JSON2Array';
 import fse = require('fs-extra')
 import URL = require('url')
+import '../String-extensions';
 
 export class CreateFolders
 {
@@ -47,7 +48,7 @@ export class CreateFolders
 				if ( log )
 				{
 					let root = path.join(target_path, comps.host)
-					console.log(colors.white.bold(this._formatStr(count, 4)), colors.gray(root) + colors.white(comps.pathname));
+					console.log(colors.white.bold(count.toString().padding_left(4, ' ')), colors.gray(root) + colors.white(comps.pathname));
 				}
 				if ( createFolders ) fse.ensureDirSync(dir);
 			}
@@ -57,15 +58,5 @@ export class CreateFolders
 			}
 		}
 		return error
-	}
-
-	private _formatStr(num: number, len: number): string
-	{
-		let res = num.toString()
-		for(let idx = res.length; idx < len; idx++)
-		{
-			res = ' ' + res;
-		}
-		return res
 	}
 }

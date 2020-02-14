@@ -5,6 +5,7 @@ const path = require("path");
 const JSON2Array_1 = require("../JSON2Array/JSON2Array");
 const fse = require("fs-extra");
 const URL = require("url");
+require("../String-extensions");
 class CreateFolders {
     constructor() { }
     static exec(target_path, json, stopExecOnError) {
@@ -36,7 +37,7 @@ class CreateFolders {
                 count += 1;
                 if (log) {
                     let root = path.join(target_path, comps.host);
-                    console.log(colors.white.bold(this._formatStr(count, 4)), colors.gray(root) + colors.white(comps.pathname));
+                    console.log(colors.white.bold(count.toString().padding_left(4, ' ')), colors.gray(root) + colors.white(comps.pathname));
                 }
                 if (createFolders)
                     fse.ensureDirSync(dir);
@@ -46,13 +47,6 @@ class CreateFolders {
             }
         }
         return error;
-    }
-    _formatStr(num, len) {
-        let res = num.toString();
-        for (let idx = res.length; idx < len; idx++) {
-            res = ' ' + res;
-        }
-        return res;
     }
 }
 exports.CreateFolders = CreateFolders;
