@@ -2,4 +2,7 @@
 
 * **central-amv-data** : contains the CENTRAL/AMV JSON file
 * **scripts/ts/CreateFolders/test.ts** : create CENTRAL and AMV directories
-* ... **WIP** : extract text (scripts/ts/TextExtract/)
+* **scripts/ts/ImageSpider/test.ts** : save CENTRAL and AMV images
+* ... <span style="color:#f00;">**WIP**</span> : extract text (scripts/ts/TextExtract/) from a single URL (<span style="color:#f90;">**currently console.log output only**</span>)
+	* scripts/ts/TextExtract/extract_text_amv_de.ts
+	* <span style="color:#f00;">**WIP**</span> scripts/ts/TextExtract/extract_text_central_de.ts

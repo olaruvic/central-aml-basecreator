@@ -1,2 +1,9 @@
-+ img.alt-Tags speichern   =>  <image_name>.alt.txt
++ img.alt-Tags speichern   =>  <image_name>.alt.txt 
+  title und alt werden schon extrahiert ... siehe ContentImage.ts
 + page.description (Meta-Tags) speichern
++ html-Seite für alle Bilder erzeugen
++ Text extract https://www.central.de/produkte/vollversicherung/fuer-selbststaendige-und-arbeitnehmer/komfortschutz/: UL in UL funktioniert noch nicht
+
+
++ <a><img /></a> funktioniert nicht in https://www.amv.de/vermoegensaufbau-und-sicherheitsplan/ ???
+  Habe im Export kein img.src und auch kein a.href gefunden

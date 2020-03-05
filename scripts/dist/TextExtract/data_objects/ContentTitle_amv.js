@@ -1,16 +1,16 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const DebugTag_1 = require("./../DebugTag");
-const Debug_1 = require("./../../Debug/Debug");
+const DebugTag_1 = require("../DebugTag");
+const Debug_1 = require("../../Debug/Debug");
 const colors = require('colors');
 const ContentAbstract_1 = require("./ContentAbstract");
-class ContentTitle extends ContentAbstract_1.ContentAbstract {
+class ContentTitle_amv extends ContentAbstract_1.ContentAbstract {
     constructor(text) {
-        super(ContentAbstract_1.ContentType.title);
+        super(ContentAbstract_1.ContentType.title_amv);
         this.text = text.trim();
     }
     static init($, tag) {
-        return new ContentTitle($(tag).text());
+        return new ContentTitle_amv($(tag).text());
     }
     static init_central(url, $, tag, result) {
         const page_header = $(tag).find('.page-header');
@@ -27,4 +27,4 @@ class ContentTitle extends ContentAbstract_1.ContentAbstract {
         process.exit(1);
     }
 }
-exports.ContentTitle = ContentTitle;
+exports.ContentTitle_amv = ContentTitle_amv;

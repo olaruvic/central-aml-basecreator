@@ -19,7 +19,7 @@ export class ContentArticleDataParagraph extends ContentArticleDataAbstract
 	{
 		super(ArticleContentType.paragraph)
 		this.text = text.trim()
-		this.className = className
+		this.className = ( typeof(className)!='undefined' && className!=null ? className : null );
 		this.textComponents = textComponents
 		//
 		this._initParagraphType()
@@ -43,52 +43,70 @@ export class ContentArticleDataParagraph extends ContentArticleDataAbstract
 
 	static init(currentUrl: string, $: any, tag: any): ContentArticleDataParagraph
 	{
-		let textComponents = []
+		const o = $(tag)
+		let result = new ContentArticleDataParagraph(o.text(), o.prop('class'), []);
+			result._parse(currentUrl, $, tag);
+		return result;
+	}
+
+	private _parse(currentUrl: string, $: any, tag: any)
+	{
 		for( let each of tag.children )
 		{
-			// console.log(`${colors.magenta(new Debug().shortInfo())} :: type=[${each.type}] name=[${each.name}] class=[${$(each).prop('class')}] text=[${$(each).text().trim().substr(0, 30)}...]`);
+			const cls = $(each).prop('class');
+			const txt_maxLen = 30;
+			const txt = $(each).text().trim().replace(/[\n\r]+/, '');
+			// console.log(`${colors.magenta(new Debug().shortInfo())} :: type=[${each.type}] name=[${each.name}] class=[cls}] text=[${txt.substr(0, txt_maxLen)}${txt.length>txt_maxLen?"...":""}]`);
 			switch ( each.type )
 			{
 				case 'text': 
-					textComponents.push( ParagraphContent.initText($, each) )
+					this.textComponents.push( ParagraphContent.initText($, each) )
 					break;
 				
 				case 'tag':
 					switch ( each.name )
 					{
 						case 'strong':
-							textComponents.push( ParagraphContent.initStrongText($, each) )
+							this.textComponents.push( ParagraphContent.initStrongText($, each) )
 							break;
 						
 						case 'sup':
-							textComponents.push( ParagraphContent.initSupText($, each) )
+							this.textComponents.push( ParagraphContent.initSupText($, each) )
 							break;
 						
 						case 'br':
-							textComponents.push( ParagraphContent.initLineBreak($, each) )
+							this.textComponents.push( ParagraphContent.initLineBreak($, each) )
 							break;
 						
 						case 'img':
-							textComponents.push( ParagraphContent.initImage(currentUrl, $, each) )
+							this.textComponents.push( ParagraphContent.initImage(currentUrl, $, each) )
 							break;
 						
 						case 'a':
-							textComponents.push( ParagraphContent.initLink(currentUrl, $, each) )
+							this.textComponents.push( ParagraphContent.initLink(currentUrl, $, each) )
+							break;
+						
+						case 'span':
+							if ( /cm-image/.test(cls) )
+							{
+								this._parse(currentUrl, $, each);
+							}
+							else
+							{
+								console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown SPAN")} :: type=[${each.type}] name=[${each.name}] class=[${cls}] text=[${txt.substr(0, txt_maxLen)}${txt.length>txt_maxLen?"...":""}]`);
+							}
 							break;
 						
 						default:
-							console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown TAG")} :: type=[${each.type}] name=[${each.name}] class=[${$(each).prop('class')}]`);
+							console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown TAG")} :: type=[${each.type}] name=[${each.name}] class=[${cls}] text=[${txt.substr(0, txt_maxLen)}${txt.length>txt_maxLen?"...":""}]`);
 							break;
 					}
 					break;
 				
 				default:
-					console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown")} :: type=[${each.type}] name=[${each.name}] class=[${$(each).prop('class')}]`);
+					console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown")} :: type=[${each.type}] name=[${each.name}] class=[${cls}]`);
 					break;
 			}
 		}
-
-		const o = $(tag)
-		return new ContentArticleDataParagraph(o.text(), o.prop('class'), textComponents)
 	}
 }

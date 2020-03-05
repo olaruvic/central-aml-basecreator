@@ -13,7 +13,7 @@ class ContentArticleDataParagraph extends ContentArticleDataAbstract_1.ContentAr
     constructor(text, className, textComponents) {
         super(ContentArticleDataAbstract_1.ArticleContentType.paragraph);
         this.text = text.trim();
-        this.className = (typeof (className) != 'undefined' && className != null ? className : null);
+        this.className = className;
         this.textComponents = textComponents;
         this._initParagraphType();
     }
@@ -29,47 +29,39 @@ class ContentArticleDataParagraph extends ContentArticleDataAbstract_1.ContentAr
         }
     }
     static init(currentUrl, $, tag) {
-        const o = $(tag);
-        let result = new ContentArticleDataParagraph(o.text(), o.prop('class'), []);
-        result._parse(currentUrl, $, tag);
-        return result;
-    }
-    _parse(currentUrl, $, tag) {
+        let textComponents = [];
         for (let each of tag.children) {
             const cls = $(each).prop('class');
-            const txt_maxLen = 30;
-            const txt = $(each).text().trim().replace(/[\n\r]+/, '');
             switch (each.type) {
                 case 'text':
-                    this.textComponents.push(ParagraphContent_1.ParagraphContent.initText($, each));
+                    textComponents.push(ParagraphContent_1.ParagraphContent.initText($, each));
                     break;
                 case 'tag':
                     switch (each.name) {
                         case 'strong':
-                            this.textComponents.push(ParagraphContent_1.ParagraphContent.initStrongText($, each));
+                            textComponents.push(ParagraphContent_1.ParagraphContent.initStrongText($, each));
                             break;
                         case 'sup':
-                            this.textComponents.push(ParagraphContent_1.ParagraphContent.initSupText($, each));
+                            textComponents.push(ParagraphContent_1.ParagraphContent.initSupText($, each));
                             break;
                         case 'br':
-                            this.textComponents.push(ParagraphContent_1.ParagraphContent.initLineBreak($, each));
+                            textComponents.push(ParagraphContent_1.ParagraphContent.initLineBreak($, each));
                             break;
                         case 'img':
-                            this.textComponents.push(ParagraphContent_1.ParagraphContent.initImage(currentUrl, $, each));
+                            textComponents.push(ParagraphContent_1.ParagraphContent.initImage(currentUrl, $, each));
                             break;
                         case 'a':
-                            this.textComponents.push(ParagraphContent_1.ParagraphContent.initLink(currentUrl, $, each));
+                            textComponents.push(ParagraphContent_1.ParagraphContent.initLink(currentUrl, $, each));
                             break;
                         case 'span':
                             if (/cm-image/.test(cls)) {
-                                this._parse(currentUrl, $, each);
                             }
                             else {
-                                console.log(`${colors.magenta(new Debug_1.Debug().shortInfo())} :: ${colors.red("Unknown SPAN")} :: type=[${each.type}] name=[${each.name}] class=[${cls}] text=[${txt.substr(0, txt_maxLen)}${txt.length > txt_maxLen ? "..." : ""}]`);
+                                console.log(`${colors.magenta(new Debug_1.Debug().shortInfo())} :: ${colors.red("Unknown SPAN")} :: type=[${each.type}] name=[${each.name}] class=[${cls}]`);
                             }
                             break;
                         default:
-                            console.log(`${colors.magenta(new Debug_1.Debug().shortInfo())} :: ${colors.red("Unknown TAG")} :: type=[${each.type}] name=[${each.name}] class=[${cls}] text=[${txt.substr(0, txt_maxLen)}${txt.length > txt_maxLen ? "..." : ""}]`);
+                            console.log(`${colors.magenta(new Debug_1.Debug().shortInfo())} :: ${colors.red("Unknown TAG")} :: type=[${each.type}] name=[${each.name}] class=[${cls}]`);
                             break;
                     }
                     break;
@@ -78,6 +70,8 @@ class ContentArticleDataParagraph extends ContentArticleDataAbstract_1.ContentAr
                     break;
             }
         }
+        const o = $(tag);
+        return new ContentArticleDataParagraph(o.text(), o.prop('class'), textComponents);
     }
 }
 exports.ContentArticleDataParagraph = ContentArticleDataParagraph;

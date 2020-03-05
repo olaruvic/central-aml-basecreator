@@ -1,6 +1,7 @@
 const colors = require('colors');
 import { Debug } from './../../Debug/Debug';
 import { ContentImage } from './ContentImage';
+import _url = require('url');
 
 export enum ParagraphContentType {
 	text = 'text',
@@ -8,7 +9,8 @@ export enum ParagraphContentType {
 	sup = 'sup',
 	img = 'img',
 	br = 'br',
-	link = 'link'
+	link = 'link',
+	tab_header = 'tab.header'
 }
 
 export class ParagraphContent
@@ -17,7 +19,9 @@ export class ParagraphContent
 	text: string|null = null
 	img_src: string|null = null
 	href: string|null = null
+	href_absolute: string|null = null
 	className: string|null = null
+	tab_id: string|null = null
 
 	constructor(type: ParagraphContentType)
 	{
@@ -67,11 +71,11 @@ export class ParagraphContent
 
 	static initLink(currentUrl: string, $: any, tag: any): ParagraphContent
 	{
-		let tmp_img 
-		
+		// console.log(`${colors.magenta(new Debug().shortInfo())} :: type=[${tag.type}] name=[${tag.name}] class=[${$(tag).prop('class')}]`);
+
 		let res = new ParagraphContent(ParagraphContentType.link)
-			tmp_img = ContentImage.init(currentUrl, $, tag);
-			res.href = tmp_img.url
+			res.href = $(tag).prop('href')
+			res.href_absolute = _url.resolve( currentUrl, res.href );
 			//
 			/*if ( tag.children.length > 1 ) 
 			{
@@ -90,18 +94,40 @@ export class ParagraphContent
 					case 'tag':
 						if ( each.name == 'img' )
 						{
-							tmp_img = ContentImage.init(currentUrl, $, each);
+							let tmp_img = ContentImage.init(currentUrl, $, each);
 							res.img_src = tmp_img.url
 						}
 						else
 						{
-							console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #5")} :: type=[${each.type}] name=[${each.name}] class=[${$(each).prop('class')}]`);
+							console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown")} :: type=[${each.type}] name=[${each.name}] class=[${$(each).prop('class')}]`);
 						}
 						break;
 					
-						default:
-							console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #5")} :: type=[${each.type}] name=[${each.name}] class=[${$(each).prop('class')}]`);
-							break;
+					default:
+						console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown")} :: type=[${each.type}] name=[${each.name}] class=[${$(each).prop('class')}]`);
+						break;
+				}
+			}
+		// console.dir(res, {colors: true});
+		return res
+	}
+
+	static initTabHeaderTitle(currentUrl: string, $: any, tag: any): ParagraphContent
+	{	
+		let res = new ParagraphContent(ParagraphContentType.tab_header)
+			res.tab_id = $(tag).prop('href').replace(/^#/im, '')
+			//
+			for( let each of tag.children )
+			{
+				switch ( each.type )
+				{
+					case 'text': 
+						res.text = $(each).text().trim()
+						break;
+					
+					default:
+						console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown")} :: type=[${each.type}] name=[${each.name}] class=[${$(each).prop('class')}]`);
+						break;
 				}
 			}
 		return res

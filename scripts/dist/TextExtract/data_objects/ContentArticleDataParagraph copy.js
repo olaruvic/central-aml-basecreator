@@ -37,8 +37,6 @@ class ContentArticleDataParagraph extends ContentArticleDataAbstract_1.ContentAr
     _parse(currentUrl, $, tag) {
         for (let each of tag.children) {
             const cls = $(each).prop('class');
-            const txt_maxLen = 30;
-            const txt = $(each).text().trim().replace(/[\n\r]+/, '');
             switch (each.type) {
                 case 'text':
                     this.textComponents.push(ParagraphContent_1.ParagraphContent.initText($, each));
@@ -65,11 +63,11 @@ class ContentArticleDataParagraph extends ContentArticleDataAbstract_1.ContentAr
                                 this._parse(currentUrl, $, each);
                             }
                             else {
-                                console.log(`${colors.magenta(new Debug_1.Debug().shortInfo())} :: ${colors.red("Unknown SPAN")} :: type=[${each.type}] name=[${each.name}] class=[${cls}] text=[${txt.substr(0, txt_maxLen)}${txt.length > txt_maxLen ? "..." : ""}]`);
+                                console.log(`${colors.magenta(new Debug_1.Debug().shortInfo())} :: ${colors.red("Unknown SPAN")} :: type=[${each.type}] name=[${each.name}] class=[${cls}]`);
                             }
                             break;
                         default:
-                            console.log(`${colors.magenta(new Debug_1.Debug().shortInfo())} :: ${colors.red("Unknown TAG")} :: type=[${each.type}] name=[${each.name}] class=[${cls}] text=[${txt.substr(0, txt_maxLen)}${txt.length > txt_maxLen ? "..." : ""}]`);
+                            console.log(`${colors.magenta(new Debug_1.Debug().shortInfo())} :: ${colors.red("Unknown TAG")} :: type=[${each.type}] name=[${each.name}] class=[${cls}]`);
                             break;
                     }
                     break;

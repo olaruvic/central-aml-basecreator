@@ -1,24 +1,24 @@
 import colors = require('colors')
 const fs = require('fs')
 const path = require('path')
-const root = require('../../root')
+const root = require('../../../root')
 const needle = require('needle')
 const _url = require('url')
 // import cheerio = require('cheerio')
 import { FileSystem } from '../FileSystem/FileSystem'
 import { stringToFile } from '../StringToFile/stringToFile'
 import { fileToString } from '../FileToString/fileToString'
-import { ContentTitle } from './data_objects/ContentTitle';
+import { ContentTitle_amv } from './data_objects/ContentTitle_amv';
 import { ContentArticle } from './data_objects/ContentArticle';
 import { ContentImage } from './data_objects/ContentImage';
 import { ContentAccordeon } from './data_objects/ContentAccordeon';
 import { ContentIFrame } from './data_objects/ContentIFrame';
 import { Debug } from '../Debug/Debug'
-const pdf = require('pdf-parse')
-const glob = require("glob")
+// const pdf = require('pdf-parse')
+// const glob = require("glob")
 const cheerio = require('cheerio')
 
-export class TextExtract
+export class TextExtractAMV
 {
 	fpath_output_csv: string|null|undefined
 	private _sitemap_links: Array<string>
@@ -51,10 +51,10 @@ export class TextExtract
 	//##########################################################################################
 	extractFromUrl(
 		starting_url: string, 
-		searchText_regexStr: string, 
-		ignoreUrlsRegEx: string, 
-		followURLs: boolean, 
-		followDomainsRegEx: string|null, 
+		// searchText_regexStr: string, 
+		// ignoreUrlsRegEx: string, 
+		// followURLs: boolean, 
+		// followDomainsRegEx: string|null, 
 		log_ifFound: boolean,
 		log_ifNotFound: boolean,
 		log_error: boolean,
@@ -199,7 +199,7 @@ console.log(JSON.stringify(result))
 							break;
 
 						case 'tag': 
-							_this._parse_seaction_tag(url, $, each_tag, result);
+							_this._parse_section_tag(url, $, each_tag, result);
 							break;
 
 						default:
@@ -211,13 +211,13 @@ console.log(JSON.stringify(result))
 		})
 	}
 
-	private _parse_seaction_tag(url: string, $: any, tag: any, result: Array<any>)
+	private _parse_section_tag(url: string, $: any, tag: any, result: Array<any>)
 	{
 		// console.log(`${colors.magenta(new Debug().shortInfo())} :: type=[${tag.type}] name=[${tag.name}] class=[${$(tag).prop('class')}]`);
 		switch ( tag.name )
 		{
 			case 'header': 
-				result.push( ContentTitle.init($, tag) );
+				result.push( ContentTitle_amv.init($, tag) );
 				break;
 
 			case 'div': 
@@ -323,7 +323,7 @@ console.log(JSON.stringify(result))
 							$('.am-rt', each).each((i, element) => {
 								let tmp_res = [];
 								//
-								_this._parse_seaction_tag(url, $, element, tmp_res);
+								_this._parse_section_tag(url, $, element, tmp_res);
 								//
 								if ( tmp_res.length != 1 )
 								{

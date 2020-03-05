@@ -67,6 +67,7 @@ export class ImageSpider
 	target_path: string
 	url_list: Array<any> = []
 	image_dictionary: {[url: string]: number} = {}
+	cleanup_images: boolean
 
 	private site_enum_idx : number
 	private downloadImages_list: Array<ImageDownloadData>
@@ -77,10 +78,11 @@ export class ImageSpider
 	private downloadCssImage_callback: ()=> void = null
 
 	//#######################################################################################################
-	constructor(image_target_path: string, json_data: any, ignore_generali_domains: boolean) 
+	constructor(image_target_path: string, json_data: any, cleanup_images: boolean) 
 	{
-		this.json_data = json_data
 		this.target_path = image_target_path
+		this.json_data = json_data
+		this.cleanup_images = cleanup_images
 		// this.url_list = null
 		this.url_list = this._create_url_list(image_target_path, json_data, true)
 
@@ -246,11 +248,14 @@ export class ImageSpider
 			// all sites processed, then clean up image folders
 			// clean-up: move all images that occur multiple times (all sites) in the global folder
 			//--------------------------------------
-			let cleanUpFolders = new CleanUpFolders(this.target_path)
-				cleanUpFolders.run('css', path.join(this.json_data.url, '_global_css_images'), 5)
-				cleanUpFolders.cleanUp_emptyFolders('css')
-				cleanUpFolders.run('images', path.join(this.json_data.url, '_global_images'), 5)
-				cleanUpFolders.cleanUp_emptyFolders('images')
+			if ( this.cleanup_images == true )
+			{
+				let cleanUpFolders = new CleanUpFolders(this.target_path)
+					cleanUpFolders.run('css', path.join(this.json_data.url, '_global_css_images'), 5)
+					cleanUpFolders.cleanUp_emptyFolders('css')
+					cleanUpFolders.run('images', path.join(this.json_data.url, '_global_images'), 5)
+					cleanUpFolders.cleanUp_emptyFolders('images')
+			}
 		}
 	}
 

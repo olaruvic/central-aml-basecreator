@@ -11,6 +11,6 @@ const json_data = require(path.join(root(), "central-amv-data", "juli2020.json")
 
 // let target_path = path.join(__dirname.replace('compiled', 'ts'), 'images')
 let target_path = '/Users/victorolaru/Desktop/test_images' 
-let ignore_generali_domains = true
-let imgSpider = new ImageSpider(target_path, json_data, ignore_generali_domains)
+let leanup_images = false
+let imgSpider = new ImageSpider(target_path, json_data, leanup_images)
 imgSpider.run()

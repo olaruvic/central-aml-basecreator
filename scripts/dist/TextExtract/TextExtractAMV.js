@@ -6,16 +6,14 @@ const path = require('path');
 const root = require('../../../root');
 const needle = require('needle');
 const _url = require('url');
-const ContentTitle_1 = require("./data_objects/ContentTitle");
+const ContentTitle_amv_1 = require("./data_objects/ContentTitle_amv");
 const ContentArticle_1 = require("./data_objects/ContentArticle");
 const ContentImage_1 = require("./data_objects/ContentImage");
 const ContentAccordeon_1 = require("./data_objects/ContentAccordeon");
 const ContentIFrame_1 = require("./data_objects/ContentIFrame");
 const Debug_1 = require("../Debug/Debug");
-const pdf = require('pdf-parse');
-const glob = require("glob");
 const cheerio = require('cheerio');
-class TextExtract {
+class TextExtractAMV {
     constructor(fpath_output_csv) {
         this.fpath_output_csv = fpath_output_csv;
         this._sitemap_links = [];
@@ -115,7 +113,7 @@ class TextExtract {
                         case 'script':
                             break;
                         case 'tag':
-                            _this._parse_seaction_tag(url, $, each_tag, result);
+                            _this._parse_section_tag(url, $, each_tag, result);
                             break;
                         default:
                             console.log(`${colors.magenta(new Debug_1.Debug().shortInfo())} :: ${colors.red("Unknown #1")} :: type=[${each_tag.type}] name=[${each_tag.name}] class=[${$(each_tag).prop('class')}]`);
@@ -125,10 +123,10 @@ class TextExtract {
             }
         });
     }
-    _parse_seaction_tag(url, $, tag, result) {
+    _parse_section_tag(url, $, tag, result) {
         switch (tag.name) {
             case 'header':
-                result.push(ContentTitle_1.ContentTitle.init($, tag));
+                result.push(ContentTitle_amv_1.ContentTitle_amv.init($, tag));
                 break;
             case 'div':
                 if (/am-rt/i.test($(tag).prop('class'))) {
@@ -199,7 +197,7 @@ class TextExtract {
                         if (/am-accordion-cnt-wrp/i.test($(each).prop('class'))) {
                             $('.am-rt', each).each((i, element) => {
                                 let tmp_res = [];
-                                _this._parse_seaction_tag(url, $, element, tmp_res);
+                                _this._parse_section_tag(url, $, element, tmp_res);
                                 if (tmp_res.length != 1) {
                                     console.log(`${colors.magenta(new Debug_1.Debug().shortInfo())} :: ${colors.red("Error: No or too many article(s)!")} ${colors.red(` num=${tmp_res.length}`)} :: type=[${each.type}] name=[${each.name}] class=[${$(each).prop('class')}]`);
                                     process.exit(1);
@@ -236,4 +234,4 @@ class TextExtract {
         result.push(new ContentAccordeon_1.ContentAccordeon(title, article));
     }
 }
-exports.TextExtract = TextExtract;
+exports.TextExtractAMV = TextExtractAMV;

@@ -7,6 +7,8 @@ const ContentArticleDataTitle_1 = require("./ContentArticleDataTitle");
 const ContentArticleDataParagraph_1 = require("./ContentArticleDataParagraph");
 const ContentArticleDataUnorderedList_1 = require("./ContentArticleDataUnorderedList");
 const ContentArticleDataTable_1 = require("./ContentArticleDataTable");
+const ContentArticleDataPriceCatcher_1 = require("./ContentArticleDataPriceCatcher");
+const ContentArticleDataTitleHx_1 = require("./ContentArticleDataTitleHx");
 class ContentArticle extends ContentAbstract_1.ContentAbstract {
     constructor() {
         super(ContentAbstract_1.ContentType.article);
@@ -17,6 +19,7 @@ class ContentArticle extends ContentAbstract_1.ContentAbstract {
         for (let each of tag.children) {
             if (each.type != 'tag')
                 continue;
+            const cls = $(each).prop('class');
             switch (each.name) {
                 case 'span':
                     article.data.push(ContentArticleDataTitle_1.ContentArticleDataTitle.init($, each));
@@ -33,8 +36,22 @@ class ContentArticle extends ContentAbstract_1.ContentAbstract {
                 case 'table':
                     article.data.push(ContentArticleDataTable_1.ContentArticleDataTable.init($, each));
                     break;
+                case 'div':
+                    if (/pricetag-inner/i.test(cls)) {
+                        article.data.push(ContentArticleDataPriceCatcher_1.ContentArticleDataPriceCatcher.init(currentUrl, $, each));
+                    }
+                    else {
+                        console.log(`${colors.magenta(new Debug_1.Debug().shortInfo())} :: ${colors.red("Unknown DIV TAG")} :: type=[${each.type}] name=[${each.name}] class=[${cls}]`);
+                    }
+                    break;
+                case 'h3':
+                    article.data.push(ContentArticleDataTitleHx_1.ContentArticleDataTitleHx.init_h3($, each));
+                    break;
+                case 'h4':
+                    article.data.push(ContentArticleDataTitleHx_1.ContentArticleDataTitleHx.init_h4($, each));
+                    break;
                 default:
-                    console.log(`${colors.magenta(new Debug_1.Debug().shortInfo())} :: ${colors.red("Unknown")} :: type=[${each.type}] name=[${each.name}] class=[${$(each).prop('class')}]`);
+                    console.log(`${colors.magenta(new Debug_1.Debug().shortInfo())} :: ${colors.red("Unknown")} :: type=[${each.type}] name=[${each.name}] class=[${cls}]`);
                     break;
             }
         }

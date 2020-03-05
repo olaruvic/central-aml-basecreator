@@ -6,6 +6,8 @@ import { ContentArticleDataTitle } from './ContentArticleDataTitle';
 import { ContentArticleDataParagraph } from './ContentArticleDataParagraph';
 import { ContentArticleDataUnorderedList } from './ContentArticleDataUnorderedList';
 import { ContentArticleDataTable } from './ContentArticleDataTable';
+import { ContentArticleDataPriceCatcher } from './ContentArticleDataPriceCatcher';
+import { ContentArticleDataTitleHx } from './ContentArticleDataTitleHx';
 
 export class ContentArticle extends ContentAbstract
 {
@@ -24,6 +26,8 @@ export class ContentArticle extends ContentAbstract
 		for( let each of tag.children )
 		{
 			if ( each.type != 'tag' ) continue
+			const cls = $(each).prop('class');
+			// console.log(`${colors.magenta(new Debug().shortInfo())} :: type=[${each.type}] name=[${each.name}] class=[${cls}]`);
 			switch ( each.name )
 			{
 				case 'span':
@@ -39,16 +43,35 @@ export class ContentArticle extends ContentAbstract
 					break;
 				
 				case 'ul':
-					// console.log(`${colors.magenta('ContentArticle.init')} :: type=[${each.type}] name=[${each.name}] class=[${$(each).prop('class')}]`);
+					// console.log(`${colors.magenta('ContentArticle.init')} :: type=[${each.type}] name=[${each.name}] class=[${cls}]`);
 					article.data.push( ContentArticleDataUnorderedList.init($, each) );
 					break;
 
 				case 'table':
 					article.data.push( ContentArticleDataTable.init($, each) )
 					break;
+
+				case 'div':
+					if ( /pricetag-inner/i.test(cls) )
+					{
+						article.data.push( ContentArticleDataPriceCatcher.init(currentUrl, $, each) );
+					}
+					else
+					{
+						console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown DIV TAG")} :: type=[${each.type}] name=[${each.name}] class=[${cls}]`);
+					}
+					break;
+				
+				case 'h3':
+					article.data.push( ContentArticleDataTitleHx.init_h3($, each) )
+					break;
+				
+				case 'h4':
+					article.data.push( ContentArticleDataTitleHx.init_h4($, each) )
+					break;
 				
 				default:
-					console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown")} :: type=[${each.type}] name=[${each.name}] class=[${$(each).prop('class')}]`);
+					console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown")} :: type=[${each.type}] name=[${each.name}] class=[${cls}]`);
 					break;
 			}
 		}

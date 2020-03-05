@@ -5,6 +5,8 @@ import { ContentAbstract, ContentType } from './ContentAbstract';
 export class ContentImage extends ContentAbstract
 {
 	url: string
+	title: string|null = null
+	alt: string|null = null
 
 	constructor(url: string)
 	{
@@ -14,7 +16,8 @@ export class ContentImage extends ContentAbstract
 
 	static init(currentUrl: string, $: any, tag: any): ContentImage
 	{
-		let img_src = $(tag).prop('src')
+		let tagObj = $(tag)
+		let img_src = tagObj.prop('src')
 		let rootUrl = ""
 		if ( /https*:/i.test(img_src) == false )
 		{
@@ -22,6 +25,23 @@ export class ContentImage extends ContentAbstract
 			rootUrl = comps.protocol + '//' + comps.host
 		}
 		//
-		return new ContentImage(rootUrl + img_src)
+		let res = new ContentImage(URL.resolve(rootUrl, img_src));
+			res.title = ContentImage._extractAttrValue(tagObj, 'title');
+			res.alt = ContentImage._extractAttrValue(tagObj, 'alt');
+		return res;
+	}
+
+	static _extractAttrValue(tagObj: any, prop_name: string): string|null
+	{
+		let val = tagObj.prop(prop_name)
+		if ( typeof(val)!='undefined' && val!=null )
+		{
+			val = val.trim()
+			return ( val.length > 0 
+				? val
+				: null
+				)
+		}
+		return null
 	}
 }

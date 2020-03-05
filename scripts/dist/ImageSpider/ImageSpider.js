@@ -32,13 +32,14 @@ class ImageDownloadData {
     }
 }
 class ImageSpider {
-    constructor(image_target_path, json_data, ignore_generali_domains) {
+    constructor(image_target_path, json_data, cleanup_images) {
         this.url_list = [];
         this.image_dictionary = {};
         this.downloadImages_callback = null;
         this.downloadCssImage_callback = null;
-        this.json_data = json_data;
         this.target_path = image_target_path;
+        this.json_data = json_data;
+        this.cleanup_images = cleanup_images;
         this.url_list = this._create_url_list(image_target_path, json_data, true);
         if (typeof (image_target_path) == 'undefined' || image_target_path == null || image_target_path == '') {
             console.log(colors.bgRed.white.bold(`Error: Parameter ${colors.underline('image_target_path')} required!\n`));
@@ -132,11 +133,13 @@ class ImageSpider {
             });
         }
         else {
-            let cleanUpFolders = new CleanUpFolders_1.CleanUpFolders(this.target_path);
-            cleanUpFolders.run('css', path.join(this.json_data.url, '_global_css_images'), 5);
-            cleanUpFolders.cleanUp_emptyFolders('css');
-            cleanUpFolders.run('images', path.join(this.json_data.url, '_global_images'), 5);
-            cleanUpFolders.cleanUp_emptyFolders('images');
+            if (this.cleanup_images == true) {
+                let cleanUpFolders = new CleanUpFolders_1.CleanUpFolders(this.target_path);
+                cleanUpFolders.run('css', path.join(this.json_data.url, '_global_css_images'), 5);
+                cleanUpFolders.cleanUp_emptyFolders('css');
+                cleanUpFolders.run('images', path.join(this.json_data.url, '_global_images'), 5);
+                cleanUpFolders.cleanUp_emptyFolders('images');
+            }
         }
     }
     _checkAndFormatLocalURL(href, origin) {
