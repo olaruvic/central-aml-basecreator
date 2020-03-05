@@ -67,6 +67,7 @@ class ContentTeaser extends ContentAbstract_1.ContentAbstract {
         }
     }
     _parse_teaser_inner_content(url, $, tag) {
+        "hier weitermachen";
         console.log(`${colors.magenta(new Debug_1.Debug().shortInfo())} :: type=[${tag.type}] name=[${tag.name}] class=[${$(tag).prop('class')}]`);
         for (let each_tag of tag.children) {
             const cls = $(each_tag).prop('class');

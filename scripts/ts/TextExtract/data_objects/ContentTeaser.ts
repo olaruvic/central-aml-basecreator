@@ -95,6 +95,7 @@ export class ContentTeaser extends ContentAbstract
 
 	private _parse_teaser_inner_content(url: string, $: any, tag: any)
 	{
+		... "hier weitermachen"
 		console.log(`${colors.magenta(new Debug().shortInfo())} :: type=[${tag.type}] name=[${tag.name}] class=[${$(tag).prop('class')}]`);
 		for( let each_tag of tag.children )
 		{
