@@ -17,7 +17,7 @@ export class ParagraphContent
 {
 	type: ParagraphContentType
 	text: string|null = null
-	img_src: string|null = null
+	img_src: Array<string>|null = null
 	href: string|null = null
 	href_absolute: string|null = null
 	className: string|null = null
@@ -59,13 +59,15 @@ export class ParagraphContent
 	static initImage(currentUrl: string, $: any, tag: any): ParagraphContent
 	{
 		let tmp_img = ContentImage.init(currentUrl, $, tag);
+		// console.log("ContentImage=".cyan.bold); console.dir(tmp_img, {colors: true, depth: 100});
 		let res = new ParagraphContent(ParagraphContentType.img)
 			let cls = $(tag).prop('class')
 			if ( typeof(cls)!='undefined' && cls!=null && cls.trim().length>0 )
 			{
 				res.className = cls.trim()
 			}
-			res.img_src = tmp_img.url
+			if ( res.img_src == null ) res.img_src = [];
+			res.img_src = res.img_src.concat( tmp_img.url );
 		return res
 	}
 
@@ -88,23 +90,46 @@ export class ParagraphContent
 				switch ( each.type )
 				{
 					case 'text': 
-						res.text = $(each).text().trim()
+						{
+							let txt = $(each).text().trim()
+							if ( txt.length > 0 )					// Nur dann ÜBERSCHREIBEN, wenn length > 0 - VORSICHT! kann den Text in <span> überschrieben
+							{
+								res.text = txt;
+							}
+						}
 						break;
 
 					case 'tag':
 						if ( each.name == 'img' )
 						{
 							let tmp_img = ContentImage.init(currentUrl, $, each);
-							res.img_src = tmp_img.url
+							if ( res.img_src == null ) res.img_src = [];
+							res.img_src = res.img_src.concat( tmp_img.url );
+						}
+						else if ( each.name == 'span' )
+						{
+							let txt = $(each).text().trim()
+							if ( txt.length > 0 )					// Nur dann ÜBERSCHREIBEN, wenn length > 0 - VORSICHT! kann den Text in <text> überschrieben
+							{
+								res.text = txt;
+							}
+							// console.log(`${colors.magenta(new Debug().shortInfo())} :: type=[${each.type}] name=[${each.name}] class=[${$(each).prop('class')}]`);
+							// console.log("text:", res.text);
 						}
 						else
 						{
-							console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown")} :: type=[${each.type}] name=[${each.name}] class=[${$(each).prop('class')}]`);
+							const txt_maxLen = 30;
+							const txt = $(each).text().trim().replace(/[\n\r]+/, '');
+							console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown")} :: type=[${each.type}] name=[${each.name}] class=[${$(each).prop('class')} text=[${txt.substr(0, txt_maxLen)}${txt.length>txt_maxLen?"...":""}]]`);
 						}
 						break;
 					
 					default:
-						console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown")} :: type=[${each.type}] name=[${each.name}] class=[${$(each).prop('class')}]`);
+						{
+							const txt_maxLen = 30;
+							const txt = $(each).text().trim().replace(/[\n\r]+/, '');
+							console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown")} :: type=[${each.type}] name=[${each.name}] class=[${$(each).prop('class')} text=[${txt.substr(0, txt_maxLen)}${txt.length>txt_maxLen?"...":""}]]`);
+						}
 						break;
 				}
 			}

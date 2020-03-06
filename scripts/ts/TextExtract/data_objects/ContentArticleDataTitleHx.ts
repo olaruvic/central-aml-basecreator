@@ -13,6 +13,12 @@ export class ContentArticleDataTitleHx extends ContentArticleDataAbstract
 		this.className = className
 	}
 
+	static init_h2($: any, tag: any): ContentArticleDataTitleHx
+	{
+		const o = $(tag)
+		return new ContentArticleDataTitleHx(ArticleContentType.title_h2, o.text(), o.prop('class'))
+	}
+
 	static init_h3($: any, tag: any): ContentArticleDataTitleHx
 	{
 		const o = $(tag)

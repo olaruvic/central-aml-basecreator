@@ -7,9 +7,9 @@ export enum ContentType {
 	img = "img",
 	accordeon = "accordeon",
 	iframe = "iframe",
-	tab_group = "tab.group",		// central only
-	tab = "tab",					// central only
-	teaser = "teaser"				// central only
+	tab_group = "tab.group",			// central only
+	tab = "tab",						// central only
+	teaser = "teaser",					// central only
 }
 
 export class ContentAbstract

@@ -51,7 +51,9 @@ class ParagraphContent {
         if (typeof (cls) != 'undefined' && cls != null && cls.trim().length > 0) {
             res.className = cls.trim();
         }
-        res.img_src = tmp_img.url;
+        if (res.img_src == null)
+            res.img_src = [];
+        res.img_src = res.img_src.concat(tmp_img.url);
         return res;
     }
     static initLink(currentUrl, $, tag) {
@@ -61,19 +63,38 @@ class ParagraphContent {
         for (let each of tag.children) {
             switch (each.type) {
                 case 'text':
-                    res.text = $(each).text().trim();
+                    {
+                        let txt = $(each).text().trim();
+                        if (txt.length > 0) {
+                            res.text = txt;
+                        }
+                    }
                     break;
                 case 'tag':
                     if (each.name == 'img') {
                         let tmp_img = ContentImage_1.ContentImage.init(currentUrl, $, each);
-                        res.img_src = tmp_img.url;
+                        if (res.img_src == null)
+                            res.img_src = [];
+                        res.img_src = res.img_src.concat(tmp_img.url);
+                    }
+                    else if (each.name == 'span') {
+                        let txt = $(each).text().trim();
+                        if (txt.length > 0) {
+                            res.text = txt;
+                        }
                     }
                     else {
-                        console.log(`${colors.magenta(new Debug_1.Debug().shortInfo())} :: ${colors.red("Unknown")} :: type=[${each.type}] name=[${each.name}] class=[${$(each).prop('class')}]`);
+                        const txt_maxLen = 30;
+                        const txt = $(each).text().trim().replace(/[\n\r]+/, '');
+                        console.log(`${colors.magenta(new Debug_1.Debug().shortInfo())} :: ${colors.red("Unknown")} :: type=[${each.type}] name=[${each.name}] class=[${$(each).prop('class')} text=[${txt.substr(0, txt_maxLen)}${txt.length > txt_maxLen ? "..." : ""}]]`);
                     }
                     break;
                 default:
-                    console.log(`${colors.magenta(new Debug_1.Debug().shortInfo())} :: ${colors.red("Unknown")} :: type=[${each.type}] name=[${each.name}] class=[${$(each).prop('class')}]`);
+                    {
+                        const txt_maxLen = 30;
+                        const txt = $(each).text().trim().replace(/[\n\r]+/, '');
+                        console.log(`${colors.magenta(new Debug_1.Debug().shortInfo())} :: ${colors.red("Unknown")} :: type=[${each.type}] name=[${each.name}] class=[${$(each).prop('class')} text=[${txt.substr(0, txt_maxLen)}${txt.length > txt_maxLen ? "..." : ""}]]`);
+                    }
                     break;
             }
         }

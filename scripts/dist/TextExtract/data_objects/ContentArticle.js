@@ -6,9 +6,11 @@ const ContentAbstract_1 = require("./ContentAbstract");
 const ContentArticleDataTitle_1 = require("./ContentArticleDataTitle");
 const ContentArticleDataParagraph_1 = require("./ContentArticleDataParagraph");
 const ContentArticleDataUnorderedList_1 = require("./ContentArticleDataUnorderedList");
+const ContentArticleDataOrderedList_1 = require("./ContentArticleDataOrderedList");
 const ContentArticleDataTable_1 = require("./ContentArticleDataTable");
 const ContentArticleDataPriceCatcher_1 = require("./ContentArticleDataPriceCatcher");
 const ContentArticleDataTitleHx_1 = require("./ContentArticleDataTitleHx");
+const ContentArticleDataDownloadLink_1 = require("./ContentArticleDataDownloadLink");
 class ContentArticle extends ContentAbstract_1.ContentAbstract {
     constructor() {
         super(ContentAbstract_1.ContentType.article);
@@ -33,6 +35,9 @@ class ContentArticle extends ContentAbstract_1.ContentAbstract {
                 case 'ul':
                     article.data.push(ContentArticleDataUnorderedList_1.ContentArticleDataUnorderedList.init($, each));
                     break;
+                case 'ol':
+                    article.data.push(ContentArticleDataOrderedList_1.ContentArticleDataOrderedList.init($, each));
+                    break;
                 case 'table':
                     article.data.push(ContentArticleDataTable_1.ContentArticleDataTable.init($, each));
                     break;
@@ -40,9 +45,15 @@ class ContentArticle extends ContentAbstract_1.ContentAbstract {
                     if (/pricetag-inner/i.test(cls)) {
                         article.data.push(ContentArticleDataPriceCatcher_1.ContentArticleDataPriceCatcher.init(currentUrl, $, each));
                     }
+                    else if (/download-link/i.test(cls)) {
+                        article.data.push(ContentArticleDataDownloadLink_1.ContentArticleDataDownloadLink.init(currentUrl, $, each));
+                    }
                     else {
                         console.log(`${colors.magenta(new Debug_1.Debug().shortInfo())} :: ${colors.red("Unknown DIV TAG")} :: type=[${each.type}] name=[${each.name}] class=[${cls}]`);
                     }
+                    break;
+                case 'h2':
+                    article.data.push(ContentArticleDataTitleHx_1.ContentArticleDataTitleHx.init_h2($, each));
                     break;
                 case 'h3':
                     article.data.push(ContentArticleDataTitleHx_1.ContentArticleDataTitleHx.init_h3($, each));

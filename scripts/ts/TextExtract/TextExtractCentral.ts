@@ -15,6 +15,8 @@ import { ContentAccordeon } from './data_objects/ContentAccordeon';
 import { ContentIFrame } from './data_objects/ContentIFrame';
 import { ContentTabGroup } from './data_objects/ContentTabGroup';
 import { ContentTeaser } from './data_objects/ContentTeaser';
+import { ParagraphContent } from './data_objects/ParagraphContent';
+import { ContentArticleDataTitleHx } from './data_objects/ContentArticleDataTitleHx';
 import { Debug } from '../Debug/Debug'
 import { ENGINE_METHOD_DIGESTS } from 'constants'
 // const pdf = require('pdf-parse')
@@ -177,8 +179,8 @@ process.exit(1);
 		//
 		let result = [];
 		this._parse_sections( url, $, $('article'), result );
-console.log(`${new Debug().shortInfo()} :: ${"DEBUG HALT".bold}`.bgRed.white);
-process.exit(1);
+// console.log(`${new Debug().shortInfo()} :: ${"DEBUG HALT".bold}`.bgRed.white);
+// process.exit(1);
 console.log("------------------------------------------------");
 console.dir(result, {colors: true, depth: 100})
 console.log("------------------------------------------------");
@@ -330,6 +332,18 @@ console.log(JSON.stringify(result))
 					{
 						result.push( ContentTeaser.init(url, $, each_tag) );
 					}
+					else if ( /module-image/i.test(cls) )
+					{
+						result.push( ContentImage.init_moduleImage(url, $, each_tag) );
+					}
+					else if ( /section-subtitle/i.test(cls) )
+					{
+						result.push( ContentArticle.init(url, $, each_tag.parent) );
+					}
+					else if ( /module-collapsible/i.test(cls) )
+					{
+						this._parse_module_collapsible(url, $, each_tag, result);
+					}
 					else
 					{
 						const txt_maxLen = 30;
@@ -356,6 +370,10 @@ console.log(JSON.stringify(result))
 		{
 			const cls = $(each_tag).prop('class');
 			const tagObj = $(each_tag);
+			//
+			// const txt_maxLen = 30;
+			// const txt = $(each_tag).text().trim().replace(/[\n\r]+/, '');
+			// console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("---")} :: type=[${each_tag.type}] name=[${each_tag.name}] class=[${cls}] text=[${txt.substr(0, txt_maxLen)}${txt.length>txt_maxLen?"...":""}]`);			
 			switch ( each_tag.type )
 			{
 				case 'text': /* ignore */ break;
@@ -365,9 +383,11 @@ console.log(JSON.stringify(result))
 					break;
 
 				default:
-					const txt_maxLen = 30;
-					const txt = $(each_tag).text().trim().replace(/[\n\r]+/, '');
-					console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #8")} :: type=[${each_tag.type}] name=[${each_tag.name}] class=[${cls}] text=[${txt.substr(0, txt_maxLen)}${txt.length>txt_maxLen?"...":""}]`);
+					{
+						const txt_maxLen = 30;
+						const txt = $(each_tag).text().trim().replace(/[\n\r]+/, '');
+						console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #8")} :: type=[${each_tag.type}] name=[${each_tag.name}] class=[${cls}] text=[${txt.substr(0, txt_maxLen)}${txt.length>txt_maxLen?"...":""}]`);
+					}
 					break;
 			}
 		}
@@ -398,116 +418,151 @@ console.log(JSON.stringify(result))
 					break;
 
 				default:
-					const txt_maxLen = 30;
-					const txt = $(each_tag).text().trim().replace(/[\n\r]+/, '');
-					console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #10")} :: type=[${each_tag.type}] name=[${each_tag.name}] class=[${cls}] text=[${txt.substr(0, txt_maxLen)}${txt.length>txt_maxLen?"...":""}]`);
+					{
+						const txt_maxLen = 30;
+						const txt = $(each_tag).text().trim().replace(/[\n\r]+/, '');
+						console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #10")} :: type=[${each_tag.type}] name=[${each_tag.name}] class=[${cls}] text=[${txt.substr(0, txt_maxLen)}${txt.length>txt_maxLen?"...":""}]`);
+					}
 					break;
 			}
 		}
 	}
 
-	private _parse_accordeon_group(url: string, $: any, tag: any, result: Array<any>)
+	private _parse_module_collapsible(url: string, $: any, tag: any, result: Array<any>)
 	{
 		// console.log(`${colors.magenta(new Debug().shortInfo())} :: type=[${tag.type}] name=[${tag.name}] class=[${$(tag).prop('class')}]`);
-		for( let each of tag.children )
+		for( let each_tag of tag.children )
 		{
-			// console.log(`${colors.magenta(new Debug().shortInfo())} :: type=[${each.type}] name=[${each.name}] class=[${$(each).prop('class')}] text=[${$(each).text().trim()}]`);
-			switch ( each.type )
+			const cls = $(each_tag).prop('class');
+			const tagObj = $(each_tag);
+			switch ( each_tag.type )
 			{
-				// case 'text': /* ignore */ break;
+				case 'text': /* ignore */ break;
 
-				// case 'tag':
-				// 	// console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #4")} :: type=[${each.type}] name=[${each.name}] class=[${$(each).prop('class')}]`);
-				// 	switch ( each.name )
-				// 	{
-				// 		case 'article':
-				// 			this._parse_accordeon(url, $, each, result)
-				// 			break;
-						
-				// 		case 'div':
-				// 			if ( /accordion-close/i.test($(each).prop('class')) )
-				// 			{
-				// 				// ignore
-				// 			}
-				// 			else
-				// 			{
-				// 				console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown TAG")} :: type=[${each.type}] name=[${each.name}] class=[${$(each).prop('class')}]`);
-				// 			}
-				// 			break;
-						
-				// 		default:
-				// 			console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown TAG")} :: type=[${each.type}] name=[${each.name}] class=[${$(each).prop('class')}]`);
-				// 			break;
-				// 	}
-				// 	break;
+				case 'tag':
+					if ( /panel-group/i.test(cls) )
+					{
+						this._parse_module_collapsible_panel_group(url, $, each_tag, result);
+					}
+					else
+					{
+						const txt_maxLen = 30;
+						const txt = $(each_tag).text().trim().replace(/[\n\r]+/, '');
+						console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #11")} :: type=[${each_tag.type}] name=[${each_tag.name}] class=[${cls}] text=[${txt.substr(0, txt_maxLen)}${txt.length>txt_maxLen?"...":""}]`);
+					}
+					break;
 
 				default:
-					console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #5")} :: type=[${each.type}] name=[${each.name}] class=[${$(each).prop('class')}]`);
+					{
+						const txt_maxLen = 30;
+						const txt = $(each_tag).text().trim().replace(/[\n\r]+/, '');
+						console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #12")} :: type=[${each_tag.type}] name=[${each_tag.name}] class=[${$(each_tag).prop('class')}]`);
+					}
 					break;
 			}
 		}
 	}
 
-	private _parse_accordeon(url: string, $: any, tag: any, result: Array<any>)
+	private _parse_module_collapsible_panel_group(url: string, $: any, tag: any, result: Array<any>)
 	{
-		let _this = this
+		// console.log(`${colors.magenta(new Debug().shortInfo())} :: type=[${tag.type}] name=[${tag.name}] class=[${$(tag).prop('class')}]`);
+		for( let each_tag of tag.children )
+		{
+			const cls = $(each_tag).prop('class');
+			const tagObj = $(each_tag);
+			switch ( each_tag.type )
+			{
+				case 'text': /* ignore */ break;
+
+				case 'tag':
+					if ( /panel/i.test(cls) )
+					{
+						this._parse_module_collapsible_panel(url, $, each_tag, result);
+					}
+					else if ( /a/i.test(each_tag.name) )
+					{
+						// a-Tag ignorieren
+					}
+					else if ( /btn/i.test(cls) )		// <=> /button/i.test(each_tag.name)
+					{
+						// Buttton zum schließen der Accordeons ignorieren
+					}
+					else
+					{
+						const txt_maxLen = 30;
+						const txt = $(each_tag).text().trim().replace(/[\n\r]+/, '');
+						console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #13")} :: type=[${each_tag.type}] name=[${each_tag.name}] class=[${cls}] text=[${txt.substr(0, txt_maxLen)}${txt.length>txt_maxLen?"...":""}]`);
+					}
+					break;
+
+				default:
+					{
+						const txt_maxLen = 30;
+						const txt = $(each_tag).text().trim().replace(/[\n\r]+/, '');
+						console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #14")} :: type=[${each_tag.type}] name=[${each_tag.name}] class=[${$(each_tag).prop('class')}]`);
+					}
+					break;
+			}
+		}
+	}
+
+	private _parse_module_collapsible_panel(url: string, $: any, tag: any, result: Array<any>)
+	{
 		let title: string = null
 		let article: ContentArticle = null
-
-		for( let each of tag.children )
+		//
+		// console.log(`${colors.magenta(new Debug().shortInfo())} :: type=[${tag.type}] name=[${tag.name}] class=[${$(tag).prop('class')}]`);
+		for( let each_tag of tag.children )
 		{
-			// console.log(`${colors.magenta(new Debug().shortInfo())} :: type=[${each.type}] name=[${each.name}] class=[${$(each).prop('class')}] text=[${$(each).text().trim()}]`);
-			if ( each.type == 'tag' )
+			const cls = $(each_tag).prop('class');
+			const tagObj = $(each_tag);
+			switch ( each_tag.type )
 			{
-				switch ( each.name )
-				{
-					// case 'a':
-					// 	let headers = $('header', each)
-					// 	if ( headers.length > 0 ) 
-					// 	{
-					// 		title = $(headers[0]).text().trim()
-					// 	}
-					// 	break;
-					
-					// case 'div':
-					// 	if ( /am-accordion-cnt-wrp/i.test($(each).prop('class')) )
-					// 	{
-					// 		$('.am-rt', each).each((i, element) => {
-					// 			let tmp_res = [];
-					// 			//
-					// 			_this._parse_seaction_tag(url, $, element, tmp_res);
-					// 			//
-					// 			if ( tmp_res.length != 1 )
-					// 			{
-					// 				console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Error: No or too many article(s)!")} ${colors.red(` num=${tmp_res.length}`)} :: type=[${each.type}] name=[${each.name}] class=[${$(each).prop('class')}]`);
-					// 				process.exit(1)
-					// 			}
-					// 			let tmp_article = tmp_res[0];
-					// 			if ( tmp_article instanceof ContentArticle )
-					// 			{
-					// 				article = tmp_article
-					// 			}
-					// 			else
-					// 			{
-					// 				console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Error: <tmp_res> contains unknwon Objects!")}`);
-					// 				console.dir(tmp_res, {colors: true});
-					// 				process.exit(1)
-					// 			}
-					// 		});
-					// 		// article = ContentArticle.init($, each)
-					// 	}
-					// 	else
-					// 	{
-					// 		console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown DIV")} :: type=[${each.type}] name=[${each.name}] class=[${$(each).prop('class')}]`);
-					// 	}
-					// 	break;
-					
-					default:
-						console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown TAG")} :: type=[${each.type}] name=[${each.name}] class=[${$(each).prop('class')}]`);
-						break;
-				}
-			} // end switch
-		} // end for each
+				case 'text': /* ignore */ break;
+
+				case 'tag':
+					if ( /panel-heading/i.test(cls) )
+					{
+						let heading = ContentArticle.init(url, $, each_tag);
+						for(let each_block of heading.data)
+						{
+							if ( /title/i.test(each_block.type) )
+							{
+								title = (each_block as ContentArticleDataTitleHx).text;
+							}
+						}
+					}
+					else if ( /panel-collapse/i.test(cls) )
+					{
+						let panel_content = tagObj.find('.rte-content')
+						if ( panel_content.length > 0 )
+						{
+							article = ContentArticle.init(url, $, panel_content[0]);
+						}
+						else
+						{
+							const txt_maxLen = 30;
+							const txt = $(each_tag).text().trim().replace(/[\n\r]+/, '');
+							console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Error: Panel does not contains .rte-content")} :: type=[${each_tag.type}] name=[${each_tag.name}] class=[${cls}] text=[${txt.substr(0, txt_maxLen)}${txt.length>txt_maxLen?"...":""}]`);
+						}
+					}
+					else
+					{
+						const txt_maxLen = 30;
+						const txt = $(each_tag).text().trim().replace(/[\n\r]+/, '');
+						console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #15")} :: type=[${each_tag.type}] name=[${each_tag.name}] class=[${cls}] text=[${txt.substr(0, txt_maxLen)}${txt.length>txt_maxLen?"...":""}]`);
+					}
+					break;
+
+				default:
+					{
+						const txt_maxLen = 30;
+						const txt = $(each_tag).text().trim().replace(/[\n\r]+/, '');
+						console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #16")} :: type=[${each_tag.type}] name=[${each_tag.name}] class=[${$(each_tag).prop('class')}]`);
+					}
+					break;
+			}
+		}
 
 		if ( typeof(title)=='undefined' || title==null || title.length<=0 )
 		{
