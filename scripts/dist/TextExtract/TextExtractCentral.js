@@ -185,7 +185,7 @@ class TextExtractCentral {
                     break;
                 case 'tag':
                     if (/rte-content/i.test(cls)) {
-                        this._parse_content_block(url, $, each_tag, result);
+                        result.push(ContentArticle_1.ContentArticle.init(url, $, each_tag));
                     }
                     else if (/price-catcher-container/i.test(cls)) {
                         this._parse_price_catcher_container(url, $, each_tag, result);
@@ -216,25 +216,6 @@ class TextExtractCentral {
                         const txt_maxLen = 30;
                         const txt = $(each_tag).text().trim().replace(/[\n\r]+/, '');
                         console.log(`${colors.magenta(new Debug_1.Debug().shortInfo())} :: ${colors.red("Unknown #7")} :: type=[${each_tag.type}] name=[${each_tag.name}] class=[${cls}] text=[${txt.substr(0, txt_maxLen)}${txt.length > txt_maxLen ? "..." : ""}]`);
-                    }
-                    break;
-            }
-        }
-    }
-    _parse_content_block(url, $, tag, result) {
-        for (let each_tag of tag.children) {
-            const cls = $(each_tag).prop('class');
-            const tagObj = $(each_tag);
-            switch (each_tag.type) {
-                case 'text': break;
-                case 'tag':
-                    result.push(ContentArticle_1.ContentArticle.init(url, $, tag));
-                    break;
-                default:
-                    {
-                        const txt_maxLen = 30;
-                        const txt = $(each_tag).text().trim().replace(/[\n\r]+/, '');
-                        console.log(`${colors.magenta(new Debug_1.Debug().shortInfo())} :: ${colors.red("Unknown #8")} :: type=[${each_tag.type}] name=[${each_tag.name}] class=[${cls}] text=[${txt.substr(0, txt_maxLen)}${txt.length > txt_maxLen ? "..." : ""}]`);
                     }
                     break;
             }

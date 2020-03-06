@@ -318,7 +318,8 @@ console.log(JSON.stringify(result))
 				case 'tag':
 					if ( /rte-content/i.test(cls) )
 					{
-						this._parse_content_block(url, $, each_tag, result);
+						// this._parse_content_block(url, $, each_tag, result);
+						result.push( ContentArticle.init(url, $, each_tag) );
 					}
 					else if ( /price-catcher-container/i.test(cls) )
 					{
@@ -363,35 +364,35 @@ console.log(JSON.stringify(result))
 		}
 	}
 
-	private _parse_content_block(url: string, $: any, tag: any, result: Array<any>)
-	{
-		// console.log(`${colors.magenta(new Debug().shortInfo())} :: type=[${tag.type}] name=[${tag.name}] class=[${$(tag).prop('class')}]`);
-		for( let each_tag of tag.children )
-		{
-			const cls = $(each_tag).prop('class');
-			const tagObj = $(each_tag);
-			//
-			// const txt_maxLen = 30;
-			// const txt = $(each_tag).text().trim().replace(/[\n\r]+/, '');
-			// console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("---")} :: type=[${each_tag.type}] name=[${each_tag.name}] class=[${cls}] text=[${txt.substr(0, txt_maxLen)}${txt.length>txt_maxLen?"...":""}]`);			
-			switch ( each_tag.type )
-			{
-				case 'text': /* ignore */ break;
+	// private _parse_content_block(url: string, $: any, tag: any, result: Array<any>)
+	// {
+	// 	// console.log(`${colors.magenta(new Debug().shortInfo())} :: type=[${tag.type}] name=[${tag.name}] class=[${$(tag).prop('class')}]`);
+	// 	for( let each_tag of tag.children )
+	// 	{
+	// 		const cls = $(each_tag).prop('class');
+	// 		const tagObj = $(each_tag);
+	// 		//
+	// 		// const txt_maxLen = 30;
+	// 		// const txt = $(each_tag).text().trim().replace(/[\n\r]+/, '');
+	// 		// console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("---")} :: type=[${each_tag.type}] name=[${each_tag.name}] class=[${cls}] text=[${txt.substr(0, txt_maxLen)}${txt.length>txt_maxLen?"...":""}]`);			
+	// 		switch ( each_tag.type )
+	// 		{
+	// 			case 'text': /* ignore */ break;
 
-				case 'tag':
-					result.push( ContentArticle.init(url, $, tag) );
-					break;
+	// 			case 'tag':
+	// 				result.push( ContentArticle.init(url, $, tag) );
+	// 				break;
 
-				default:
-					{
-						const txt_maxLen = 30;
-						const txt = $(each_tag).text().trim().replace(/[\n\r]+/, '');
-						console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #8")} :: type=[${each_tag.type}] name=[${each_tag.name}] class=[${cls}] text=[${txt.substr(0, txt_maxLen)}${txt.length>txt_maxLen?"...":""}]`);
-					}
-					break;
-			}
-		}
-	}
+	// 			default:
+	// 				{
+	// 					const txt_maxLen = 30;
+	// 					const txt = $(each_tag).text().trim().replace(/[\n\r]+/, '');
+	// 					console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #8")} :: type=[${each_tag.type}] name=[${each_tag.name}] class=[${cls}] text=[${txt.substr(0, txt_maxLen)}${txt.length>txt_maxLen?"...":""}]`);
+	// 				}
+	// 				break;
+	// 		}
+	// 	}
+	// }
 
 	private _parse_price_catcher_container(url: string, $: any, tag: any, result: Array<any>)
 	{
