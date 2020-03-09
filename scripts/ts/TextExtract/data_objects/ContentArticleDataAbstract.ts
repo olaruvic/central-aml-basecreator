@@ -17,9 +17,11 @@ export enum ArticleContentType {
 export class ContentArticleDataAbstract
 {
 	type: ArticleContentType
+	isPrimitive: boolean
 
 	constructor(type: ArticleContentType) 
 	{
 		this.type = type
+		this.isPrimitive = false		// true := ParagraphContent, false := ContentArticleDataAbstract
 	}
 }

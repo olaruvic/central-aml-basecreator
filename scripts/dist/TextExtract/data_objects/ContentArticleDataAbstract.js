@@ -17,6 +17,7 @@ var ArticleContentType;
 class ContentArticleDataAbstract {
     constructor(type) {
         this.type = type;
+        this.isPrimitive = false;
     }
 }
 exports.ContentArticleDataAbstract = ContentArticleDataAbstract;

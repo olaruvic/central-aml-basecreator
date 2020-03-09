@@ -2,6 +2,8 @@ const colors = require('colors');
 import { Debug } from './../../Debug/Debug';
 import { ContentArticleDataAbstract, ArticleContentType } from './ContentArticleDataAbstract';
 import { ParagraphContent } from './ParagraphContent';
+import { ContentArticleDataUnorderedList } from './ContentArticleDataUnorderedList';
+import { ContentArticleDataOrderedList } from './ContentArticleDataOrderedList';
 
 export enum ParagraphContentType {
 	text = 'text',
@@ -13,7 +15,7 @@ export class ContentArticleDataParagraph extends ContentArticleDataAbstract
 	paragraphType: ParagraphContentType
 	text: string
 	className: string|undefined|null
-	textComponents: Array<ParagraphContent>
+	textComponents: Array<ParagraphContent|ContentArticleDataAbstract>
 
 	constructor(text: string, className: string, textComponents: Array<ParagraphContent>)
 	{
@@ -84,6 +86,14 @@ export class ContentArticleDataParagraph extends ContentArticleDataAbstract
 						
 						case 'a':
 							this.textComponents.push( ParagraphContent.initLink(currentUrl, $, each) )
+							break;
+						
+						case 'ul':
+							this.textComponents.push( ContentArticleDataUnorderedList.init(currentUrl, $, each) )
+							break;
+						
+						case 'ol':
+							this.textComponents.push( ContentArticleDataOrderedList.init(currentUrl, $, each) )
 							break;
 						
 						case 'span':

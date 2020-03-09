@@ -46,11 +46,11 @@ export class ContentArticle extends ContentAbstract
 				
 				case 'ul':
 					// console.log(`${colors.magenta('ContentArticle.init')} :: type=[${each.type}] name=[${each.name}] class=[${cls}]`);
-					article.data.push( ContentArticleDataUnorderedList.init($, each) );
+					article.data.push( ContentArticleDataUnorderedList.init(currentUrl, $, each) );
 					break;
 				
 				case 'ol':
-					article.data.push( ContentArticleDataOrderedList.init($, each) );
+					article.data.push( ContentArticleDataOrderedList.init(currentUrl, $, each) );
 					break;
 
 				case 'table':

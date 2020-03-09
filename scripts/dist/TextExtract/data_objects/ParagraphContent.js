@@ -4,16 +4,16 @@ const colors = require('colors');
 const Debug_1 = require("./../../Debug/Debug");
 const ContentImage_1 = require("./ContentImage");
 const _url = require("url");
-var ParagraphContentType;
-(function (ParagraphContentType) {
-    ParagraphContentType["text"] = "text";
-    ParagraphContentType["strong"] = "strong";
-    ParagraphContentType["sup"] = "sup";
-    ParagraphContentType["img"] = "img";
-    ParagraphContentType["br"] = "br";
-    ParagraphContentType["link"] = "link";
-    ParagraphContentType["tab_header"] = "tab.header";
-})(ParagraphContentType = exports.ParagraphContentType || (exports.ParagraphContentType = {}));
+var ParagraphContentPrimitiveType;
+(function (ParagraphContentPrimitiveType) {
+    ParagraphContentPrimitiveType["text"] = "text";
+    ParagraphContentPrimitiveType["strong"] = "strong";
+    ParagraphContentPrimitiveType["sup"] = "sup";
+    ParagraphContentPrimitiveType["img"] = "img";
+    ParagraphContentPrimitiveType["br"] = "br";
+    ParagraphContentPrimitiveType["link"] = "link";
+    ParagraphContentPrimitiveType["tab_header"] = "tab.header";
+})(ParagraphContentPrimitiveType = exports.ParagraphContentPrimitiveType || (exports.ParagraphContentPrimitiveType = {}));
 class ParagraphContent {
     constructor(type) {
         this.text = null;
@@ -22,31 +22,32 @@ class ParagraphContent {
         this.href_absolute = null;
         this.className = null;
         this.tab_id = null;
-        this.type = type;
+        this.type_primitive = type;
+        this.isPrimitive = true;
     }
     static initText($, tag) {
-        let res = new ParagraphContent(ParagraphContentType.text);
+        let res = new ParagraphContent(ParagraphContentPrimitiveType.text);
         res.text = $(tag).text().trim();
         return res;
     }
     static initStrongText($, tag) {
-        let res = new ParagraphContent(ParagraphContentType.strong);
+        let res = new ParagraphContent(ParagraphContentPrimitiveType.strong);
         res.text = $(tag).text().trim();
         return res;
     }
     static initSupText($, tag) {
-        let res = new ParagraphContent(ParagraphContentType.sup);
+        let res = new ParagraphContent(ParagraphContentPrimitiveType.sup);
         res.text = $(tag).text().trim();
         return res;
     }
     static initLineBreak($, tag) {
-        let res = new ParagraphContent(ParagraphContentType.br);
+        let res = new ParagraphContent(ParagraphContentPrimitiveType.br);
         res.text = '\n';
         return res;
     }
     static initImage(currentUrl, $, tag) {
         let tmp_img = ContentImage_1.ContentImage.init(currentUrl, $, tag);
-        let res = new ParagraphContent(ParagraphContentType.img);
+        let res = new ParagraphContent(ParagraphContentPrimitiveType.img);
         let cls = $(tag).prop('class');
         if (typeof (cls) != 'undefined' && cls != null && cls.trim().length > 0) {
             res.className = cls.trim();
@@ -57,7 +58,7 @@ class ParagraphContent {
         return res;
     }
     static initLink(currentUrl, $, tag) {
-        let res = new ParagraphContent(ParagraphContentType.link);
+        let res = new ParagraphContent(ParagraphContentPrimitiveType.link);
         res.href = $(tag).prop('href');
         res.href_absolute = _url.resolve(currentUrl, res.href);
         for (let each of tag.children) {
@@ -101,7 +102,7 @@ class ParagraphContent {
         return res;
     }
     static initTabHeaderTitle(currentUrl, $, tag) {
-        let res = new ParagraphContent(ParagraphContentType.tab_header);
+        let res = new ParagraphContent(ParagraphContentPrimitiveType.tab_header);
         res.tab_id = $(tag).prop('href').replace(/^#/im, '');
         for (let each of tag.children) {
             switch (each.type) {

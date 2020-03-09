@@ -4,6 +4,8 @@ const colors = require('colors');
 const Debug_1 = require("./../../Debug/Debug");
 const ContentArticleDataAbstract_1 = require("./ContentArticleDataAbstract");
 const ParagraphContent_1 = require("./ParagraphContent");
+const ContentArticleDataUnorderedList_1 = require("./ContentArticleDataUnorderedList");
+const ContentArticleDataOrderedList_1 = require("./ContentArticleDataOrderedList");
 var ParagraphContentType;
 (function (ParagraphContentType) {
     ParagraphContentType["text"] = "text";
@@ -59,6 +61,12 @@ class ContentArticleDataParagraph extends ContentArticleDataAbstract_1.ContentAr
                             break;
                         case 'a':
                             this.textComponents.push(ParagraphContent_1.ParagraphContent.initLink(currentUrl, $, each));
+                            break;
+                        case 'ul':
+                            this.textComponents.push(ContentArticleDataUnorderedList_1.ContentArticleDataUnorderedList.init(currentUrl, $, each));
+                            break;
+                        case 'ol':
+                            this.textComponents.push(ContentArticleDataOrderedList_1.ContentArticleDataOrderedList.init(currentUrl, $, each));
                             break;
                         case 'span':
                             if (/cm-image/.test(cls)) {

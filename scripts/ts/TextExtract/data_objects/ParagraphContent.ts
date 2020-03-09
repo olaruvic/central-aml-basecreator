@@ -3,7 +3,7 @@ import { Debug } from './../../Debug/Debug';
 import { ContentImage } from './ContentImage';
 import _url = require('url');
 
-export enum ParagraphContentType {
+export enum ParagraphContentPrimitiveType {
 	text = 'text',
 	strong = 'strong',
 	sup = 'sup',
@@ -15,7 +15,8 @@ export enum ParagraphContentType {
 
 export class ParagraphContent
 {
-	type: ParagraphContentType
+	type_primitive: ParagraphContentPrimitiveType
+	isPrimitive: boolean
 	text: string|null = null
 	img_src: Array<string>|null = null
 	href: string|null = null
@@ -23,35 +24,36 @@ export class ParagraphContent
 	className: string|null = null
 	tab_id: string|null = null
 
-	constructor(type: ParagraphContentType)
+	constructor(type: ParagraphContentPrimitiveType)
 	{
-		this.type = type
+		this.type_primitive = type
+		this.isPrimitive = true			// true := ParagraphContent, false := ContentArticleDataAbstract
 	}
 
 	static initText($: any, tag: any): ParagraphContent
 	{
-		let res = new ParagraphContent(ParagraphContentType.text)
+		let res = new ParagraphContent(ParagraphContentPrimitiveType.text)
 			res.text = $(tag).text().trim()
 		return res
 	}
 
 	static initStrongText($: any, tag: any): ParagraphContent
 	{
-		let res = new ParagraphContent(ParagraphContentType.strong)
+		let res = new ParagraphContent(ParagraphContentPrimitiveType.strong)
 			res.text = $(tag).text().trim()
 		return res
 	}
 
 	static initSupText($: any, tag: any): ParagraphContent
 	{
-		let res = new ParagraphContent(ParagraphContentType.sup)
+		let res = new ParagraphContent(ParagraphContentPrimitiveType.sup)
 			res.text = $(tag).text().trim()
 		return res
 	}
 
 	static initLineBreak($: any, tag: any): ParagraphContent
 	{
-		let res = new ParagraphContent(ParagraphContentType.br)
+		let res = new ParagraphContent(ParagraphContentPrimitiveType.br)
 			res.text = '\n'
 		return res
 	}
@@ -60,7 +62,7 @@ export class ParagraphContent
 	{
 		let tmp_img = ContentImage.init(currentUrl, $, tag);
 		// console.log("ContentImage=".cyan.bold); console.dir(tmp_img, {colors: true, depth: 100});
-		let res = new ParagraphContent(ParagraphContentType.img)
+		let res = new ParagraphContent(ParagraphContentPrimitiveType.img)
 			let cls = $(tag).prop('class')
 			if ( typeof(cls)!='undefined' && cls!=null && cls.trim().length>0 )
 			{
@@ -75,7 +77,7 @@ export class ParagraphContent
 	{
 		// console.log(`${colors.magenta(new Debug().shortInfo())} :: type=[${tag.type}] name=[${tag.name}] class=[${$(tag).prop('class')}]`);
 
-		let res = new ParagraphContent(ParagraphContentType.link)
+		let res = new ParagraphContent(ParagraphContentPrimitiveType.link)
 			res.href = $(tag).prop('href')
 			res.href_absolute = _url.resolve( currentUrl, res.href );
 			//
@@ -139,7 +141,7 @@ export class ParagraphContent
 
 	static initTabHeaderTitle(currentUrl: string, $: any, tag: any): ParagraphContent
 	{	
-		let res = new ParagraphContent(ParagraphContentType.tab_header)
+		let res = new ParagraphContent(ParagraphContentPrimitiveType.tab_header)
 			res.tab_id = $(tag).prop('href').replace(/^#/im, '')
 			//
 			for( let each of tag.children )

@@ -33,10 +33,10 @@ class ContentArticle extends ContentAbstract_1.ContentAbstract {
                     }
                     break;
                 case 'ul':
-                    article.data.push(ContentArticleDataUnorderedList_1.ContentArticleDataUnorderedList.init($, each));
+                    article.data.push(ContentArticleDataUnorderedList_1.ContentArticleDataUnorderedList.init(currentUrl, $, each));
                     break;
                 case 'ol':
-                    article.data.push(ContentArticleDataOrderedList_1.ContentArticleDataOrderedList.init($, each));
+                    article.data.push(ContentArticleDataOrderedList_1.ContentArticleDataOrderedList.init(currentUrl, $, each));
                     break;
                 case 'table':
                     article.data.push(ContentArticleDataTable_1.ContentArticleDataTable.init($, each));
