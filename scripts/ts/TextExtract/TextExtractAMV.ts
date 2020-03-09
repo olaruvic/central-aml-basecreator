@@ -169,7 +169,8 @@ export class TextExtractAMV
 		const $ = cheerio.load(html_body)
 		//
 		let result = [];
-		this._parse_sections( url, $, $('section'), result );
+		this._parse_head_image( url, $, $('#am-pagevisual'), result );
+		this._parse_sections( url, $, $('.ym-col1 .ym-cbox'), result );
 console.log("------------------------------------------------");
 console.dir(result, {colors: true, depth: 100})
 console.log("------------------------------------------------");
@@ -181,34 +182,113 @@ console.log(JSON.stringify(result))
 		});*/
 	}
 
-	private _parse_sections(url: string, $: any, sections: any, result: Array<any>)
+	private _parse_head_image(url: string, $: any, head_image_section: any, result: Array<any>)
 	{
-		let _this = this;
-		sections.each(function(i, elem) {
-			let cls = $(this).prop('class')
-			if ( typeof(cls)=='undefined' || cls==null || cls.trim().length<=0 )
+		for (let idx = 0; idx < head_image_section.length; idx++)
+		{
+			let each_tag_found = head_image_section.get(idx)
+			for( let each_tag of each_tag_found.children )
 			{
-				for (let each_tag of elem.children)
+				let tagObj = $(each_tag);
+				let cls = tagObj.prop('class')
+				switch ( each_tag.type )
 				{
-					let tagObj = $(each_tag);
-					switch ( each_tag.type )
-					{
-						case 'text': 
-						case 'script':
-							/* ignore whitespaces */ 
-							break;
+					case 'text': 
+						// ignore whitespaces
+						break;
 
-						case 'tag': 
-							_this._parse_section_tag(url, $, each_tag, result);
-							break;
+					case 'tag': 
+						if ( /img/i.test(tagObj) )
+						{
+							result.push( ContentImage.init(url, $, each_tag) );
+						}
+						else
+						{
+							const txt_maxLen = 30;
+							const txt = $(each_tag).text().trim().replace(/[\n\r]+/, '');
+							console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown TAG #1000")} :: type=[${each_tag.type}] name=[${each_tag.name}] class=[${$(each_tag).prop('class')}] text=[${txt.substr(0, txt_maxLen)}${txt.length>txt_maxLen?"...":""}]`);
+						}
+						break;
 
-						default:
-							console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #1")} :: type=[${each_tag.type}] name=[${each_tag.name}] class=[${$(each_tag).prop('class')}]`);
-							break;
-					}
+					default:
+						{
+							const txt_maxLen = 30;
+							const txt = $(each_tag).text().trim().replace(/[\n\r]+/, '');
+							console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #1001")} :: type=[${each_tag.type}] name=[${each_tag.name}] class=[${$(each_tag).prop('class')}] text=[${txt.substr(0, txt_maxLen)}${txt.length>txt_maxLen?"...":""}]`);
+						}
+						break;
 				}
 			}
-		})
+		}
+	}
+
+	private _parse_sections(url: string, $: any, sections: any, result: Array<any>)
+	{
+		for (let idx = 0; idx < sections.length; idx++)
+		{
+			let each_tag_found = sections.get(idx)
+			for( let each_tag of each_tag_found.children )
+			{
+				let tagObj = $(each_tag);
+				let cls = tagObj.prop('class')
+				switch ( each_tag.type )
+				{
+					case 'text': 
+					case 'script':
+						// ignore whitespaces
+						break;
+
+					case 'tag': 
+						if ( /section/i.test(each_tag.name) )
+						{
+							this._parse_section(url, $, each_tag, result);
+						}
+						else if ( /footer/i.test(each_tag.name) )
+						{
+							// ignore
+						}
+						else
+						{
+							const txt_maxLen = 30;
+							const txt = $(each_tag).text().trim().replace(/[\n\r]+/, '');
+							console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown TAG #1.a")} :: type=[${each_tag.type}] name=[${each_tag.name}] class=[${$(each_tag).prop('class')}] text=[${txt.substr(0, txt_maxLen)}${txt.length>txt_maxLen?"...":""}]`);
+						}
+						break;
+
+					default:
+						{
+							const txt_maxLen = 30;
+							const txt = $(each_tag).text().trim().replace(/[\n\r]+/, '');
+							console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #1.b")} :: type=[${each_tag.type}] name=[${each_tag.name}] class=[${$(each_tag).prop('class')}] text=[${txt.substr(0, txt_maxLen)}${txt.length>txt_maxLen?"...":""}]`);
+						}
+						break;
+				}
+			}
+		}
+	}
+
+	private _parse_section(url: string, $: any, tag: any, result: Array<any>)
+	{
+		// console.log(`${colors.magenta(new Debug().shortInfo())} :: type=[${tag.type}] name=[${tag.name}] class=[${$(tag).prop('class')}]`);
+		for( let each of tag.children )
+		{
+			// console.log(`${colors.magenta(new Debug().shortInfo())} :: type=[${each.type}] name=[${each.name}] class=[${$(each).prop('class')}] text=[${$(each).text().trim()}]`);
+			switch ( each.type )
+			{
+				case 'text': 
+				case 'script':
+					// ignore whitespaces
+					break;
+
+				case 'tag':
+					this._parse_section_tag(url, $, each, result);
+					break;
+
+				default:
+					console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #1.c")} :: type=[${each.type}] name=[${each.name}] class=[${$(each).prop('class')}]`);
+					break;
+			}
+		}
 	}
 
 	private _parse_section_tag(url: string, $: any, tag: any, result: Array<any>)
@@ -231,7 +311,9 @@ console.log(JSON.stringify(result))
 				}
 				else
 				{
-					console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #2")} :: type=[${tag.type}] name=[${tag.name}] class=[${$(tag).prop('class')}]`);
+					const txt_maxLen = 30;
+					const txt = $(tag).text().trim().replace(/[\n\r]+/, '');
+					console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #2")} :: type=[${tag.type}] name=[${tag.name}] class=[${$(tag).prop('class')}] text=[${txt.substr(0, txt_maxLen)}${txt.length>txt_maxLen?"...":""}]`);
 				}
 				break;
 
@@ -249,7 +331,11 @@ console.log(JSON.stringify(result))
 				break;
 			
 			default: 
-				console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #3")} :: type=[${tag.type}] name=[${tag.name}] class=[${$(tag).prop('class')}]`);
+				{
+					const txt_maxLen = 30;
+					const txt = $(tag).text().trim().replace(/[\n\r]+/, '');
+					console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #3")} :: type=[${tag.type}] name=[${tag.name}] class=[${$(tag).prop('class')}] text=[${txt.substr(0, txt_maxLen)}${txt.length>txt_maxLen?"...":""}]`);
+				}
 				break;
 		}
 	}
@@ -353,8 +439,8 @@ console.log(JSON.stringify(result))
 					default:
 						console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown TAG")} :: type=[${each.type}] name=[${each.name}] class=[${$(each).prop('class')}]`);
 						break;
-				}
-			} // end switch
+				} // end switch
+			} 
 		} // end for each
 
 		if ( typeof(title)=='undefined' || title==null || title.length<=0 )

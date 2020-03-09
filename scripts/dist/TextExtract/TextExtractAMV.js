@@ -95,33 +95,90 @@ class TextExtractAMV {
     _extractText(url, html_body, callback) {
         const $ = cheerio.load(html_body);
         let result = [];
-        this._parse_sections(url, $, $('section'), result);
+        this._parse_head_image(url, $, $('#am-pagevisual'), result);
+        this._parse_sections(url, $, $('.ym-col1 .ym-cbox'), result);
         console.log("------------------------------------------------");
         console.dir(result, { colors: true, depth: 100 });
         console.log("------------------------------------------------");
         console.log(JSON.stringify(result));
     }
-    _parse_sections(url, $, sections, result) {
-        let _this = this;
-        sections.each(function (i, elem) {
-            let cls = $(this).prop('class');
-            if (typeof (cls) == 'undefined' || cls == null || cls.trim().length <= 0) {
-                for (let each_tag of elem.children) {
-                    let tagObj = $(each_tag);
-                    switch (each_tag.type) {
-                        case 'text':
-                        case 'script':
-                            break;
-                        case 'tag':
-                            _this._parse_section_tag(url, $, each_tag, result);
-                            break;
-                        default:
-                            console.log(`${colors.magenta(new Debug_1.Debug().shortInfo())} :: ${colors.red("Unknown #1")} :: type=[${each_tag.type}] name=[${each_tag.name}] class=[${$(each_tag).prop('class')}]`);
-                            break;
-                    }
+    _parse_head_image(url, $, head_image_section, result) {
+        for (let idx = 0; idx < head_image_section.length; idx++) {
+            let each_tag_found = head_image_section.get(idx);
+            for (let each_tag of each_tag_found.children) {
+                let tagObj = $(each_tag);
+                let cls = tagObj.prop('class');
+                switch (each_tag.type) {
+                    case 'text':
+                        break;
+                    case 'tag':
+                        if (/img/i.test(tagObj)) {
+                            result.push(ContentImage_1.ContentImage.init(url, $, each_tag));
+                        }
+                        else {
+                            const txt_maxLen = 30;
+                            const txt = $(each_tag).text().trim().replace(/[\n\r]+/, '');
+                            console.log(`${colors.magenta(new Debug_1.Debug().shortInfo())} :: ${colors.red("Unknown TAG #1000")} :: type=[${each_tag.type}] name=[${each_tag.name}] class=[${$(each_tag).prop('class')}] text=[${txt.substr(0, txt_maxLen)}${txt.length > txt_maxLen ? "..." : ""}]`);
+                        }
+                        break;
+                    default:
+                        {
+                            const txt_maxLen = 30;
+                            const txt = $(each_tag).text().trim().replace(/[\n\r]+/, '');
+                            console.log(`${colors.magenta(new Debug_1.Debug().shortInfo())} :: ${colors.red("Unknown #1001")} :: type=[${each_tag.type}] name=[${each_tag.name}] class=[${$(each_tag).prop('class')}] text=[${txt.substr(0, txt_maxLen)}${txt.length > txt_maxLen ? "..." : ""}]`);
+                        }
+                        break;
                 }
             }
-        });
+        }
+    }
+    _parse_sections(url, $, sections, result) {
+        for (let idx = 0; idx < sections.length; idx++) {
+            let each_tag_found = sections.get(idx);
+            for (let each_tag of each_tag_found.children) {
+                let tagObj = $(each_tag);
+                let cls = tagObj.prop('class');
+                switch (each_tag.type) {
+                    case 'text':
+                    case 'script':
+                        break;
+                    case 'tag':
+                        if (/section/i.test(each_tag.name)) {
+                            this._parse_section(url, $, each_tag, result);
+                        }
+                        else if (/footer/i.test(each_tag.name)) {
+                        }
+                        else {
+                            const txt_maxLen = 30;
+                            const txt = $(each_tag).text().trim().replace(/[\n\r]+/, '');
+                            console.log(`${colors.magenta(new Debug_1.Debug().shortInfo())} :: ${colors.red("Unknown TAG #1.a")} :: type=[${each_tag.type}] name=[${each_tag.name}] class=[${$(each_tag).prop('class')}] text=[${txt.substr(0, txt_maxLen)}${txt.length > txt_maxLen ? "..." : ""}]`);
+                        }
+                        break;
+                    default:
+                        {
+                            const txt_maxLen = 30;
+                            const txt = $(each_tag).text().trim().replace(/[\n\r]+/, '');
+                            console.log(`${colors.magenta(new Debug_1.Debug().shortInfo())} :: ${colors.red("Unknown #1.b")} :: type=[${each_tag.type}] name=[${each_tag.name}] class=[${$(each_tag).prop('class')}] text=[${txt.substr(0, txt_maxLen)}${txt.length > txt_maxLen ? "..." : ""}]`);
+                        }
+                        break;
+                }
+            }
+        }
+    }
+    _parse_section(url, $, tag, result) {
+        for (let each of tag.children) {
+            switch (each.type) {
+                case 'text':
+                case 'script':
+                    break;
+                case 'tag':
+                    this._parse_section_tag(url, $, each, result);
+                    break;
+                default:
+                    console.log(`${colors.magenta(new Debug_1.Debug().shortInfo())} :: ${colors.red("Unknown #1.c")} :: type=[${each.type}] name=[${each.name}] class=[${$(each).prop('class')}]`);
+                    break;
+            }
+        }
     }
     _parse_section_tag(url, $, tag, result) {
         switch (tag.name) {
@@ -136,7 +193,9 @@ class TextExtractAMV {
                     this._parse_accordeon_group(url, $, tag, result);
                 }
                 else {
-                    console.log(`${colors.magenta(new Debug_1.Debug().shortInfo())} :: ${colors.red("Unknown #2")} :: type=[${tag.type}] name=[${tag.name}] class=[${$(tag).prop('class')}]`);
+                    const txt_maxLen = 30;
+                    const txt = $(tag).text().trim().replace(/[\n\r]+/, '');
+                    console.log(`${colors.magenta(new Debug_1.Debug().shortInfo())} :: ${colors.red("Unknown #2")} :: type=[${tag.type}] name=[${tag.name}] class=[${$(tag).prop('class')}] text=[${txt.substr(0, txt_maxLen)}${txt.length > txt_maxLen ? "..." : ""}]`);
                 }
                 break;
             case 'img':
@@ -149,7 +208,11 @@ class TextExtractAMV {
             case 'nav':
                 break;
             default:
-                console.log(`${colors.magenta(new Debug_1.Debug().shortInfo())} :: ${colors.red("Unknown #3")} :: type=[${tag.type}] name=[${tag.name}] class=[${$(tag).prop('class')}]`);
+                {
+                    const txt_maxLen = 30;
+                    const txt = $(tag).text().trim().replace(/[\n\r]+/, '');
+                    console.log(`${colors.magenta(new Debug_1.Debug().shortInfo())} :: ${colors.red("Unknown #3")} :: type=[${tag.type}] name=[${tag.name}] class=[${$(tag).prop('class')}] text=[${txt.substr(0, txt_maxLen)}${txt.length > txt_maxLen ? "..." : ""}]`);
+                }
                 break;
         }
     }
