@@ -388,6 +388,8 @@ console.log(JSON.stringify(result))
 		let title: string = null
 		let article: ContentArticle = null
 
+full width images ermitteln
+
 		for( let each of tag.children )
 		{
 			// console.log(`${colors.magenta(new Debug().shortInfo())} :: type=[${each.type}] name=[${each.name}] class=[${$(each).prop('class')}] text=[${$(each).text().trim()}]`);

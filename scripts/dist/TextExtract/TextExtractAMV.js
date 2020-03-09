@@ -247,6 +247,10 @@ class TextExtractAMV {
         let _this = this;
         let title = null;
         let article = null;
+        full;
+        width;
+        images;
+        ermitteln;
         for (let each of tag.children) {
             if (each.type == 'tag') {
                 switch (each.name) {
