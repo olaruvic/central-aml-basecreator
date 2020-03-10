@@ -99,17 +99,16 @@ class TextExtractCentral {
         console.log(JSON.stringify(result));
     }
     _parse_sections(url, $, sections, result) {
-        let _this = this;
-        sections.each(function (i, elem) {
-            console.log("################################################################ _parse_sections".yellow);
-            for (let each_tag of elem.children) {
+        for (let idx = 0; idx < sections.length; idx++) {
+            let each_tag_found = sections.get(idx);
+            for (let each_tag of each_tag_found.children) {
                 let tagObj = $(each_tag);
                 switch (each_tag.type) {
                     case 'text':
                     case 'script':
                         break;
                     case 'tag':
-                        _this._parse_section_tag(url, $, each_tag, result);
+                        this._parse_section_tag(url, $, each_tag, result);
                         break;
                     default:
                         {
@@ -120,7 +119,7 @@ class TextExtractCentral {
                         break;
                 }
             }
-        });
+        }
     }
     _parse_section_tag(url, $, tag, result) {
         const cls = $(tag).prop('class');
@@ -305,7 +304,7 @@ class TextExtractCentral {
     }
     _parse_module_collapsible_panel(url, $, tag, result) {
         let title = null;
-        let article = null;
+        let articles = [];
         for (let each_tag of tag.children) {
             const cls = $(each_tag).prop('class');
             const tagObj = $(each_tag);
@@ -323,7 +322,7 @@ class TextExtractCentral {
                     else if (/panel-collapse/i.test(cls)) {
                         let panel_content = tagObj.find('.rte-content');
                         if (panel_content.length > 0) {
-                            article = ContentArticle_1.ContentArticle.init(url, $, panel_content[0]);
+                            articles.push(ContentArticle_1.ContentArticle.init(url, $, panel_content[0]));
                         }
                         else {
                             const txt_maxLen = 30;
@@ -350,11 +349,11 @@ class TextExtractCentral {
             console.log(colors.red(`${colors.magenta(new Debug_1.Debug().shortInfo())} :: Error: <title> is empty! tag=[type=[${tag.type}] name=[${tag.name}] class=[${$(tag).prop('class')}]]`));
             process.exit(1);
         }
-        if (typeof (article) == 'undefined' || article == null) {
+        if (articles.length <= 0) {
             console.log(colors.red(`${colors.magenta(new Debug_1.Debug().shortInfo())} :: Error: <article> not found or is empty! tag=[type=[${tag.type}] name=[${tag.name}] class=[${$(tag).prop('class')}]]`));
             process.exit(1);
         }
-        result.push(new ContentAccordeon_1.ContentAccordeon(title, article));
+        result.push(new ContentAccordeon_1.ContentAccordeon(title, articles));
     }
 }
 exports.TextExtractCentral = TextExtractCentral;

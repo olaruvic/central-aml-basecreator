@@ -6,12 +6,13 @@ const path = require('path');
 const root = require('../../../root');
 const needle = require('needle');
 const _url = require('url');
+const Debug_1 = require("../Debug/Debug");
 const ContentTitle_amv_1 = require("./data_objects/ContentTitle_amv");
 const ContentArticle_1 = require("./data_objects/ContentArticle");
 const ContentImage_1 = require("./data_objects/ContentImage");
 const ContentAccordeon_1 = require("./data_objects/ContentAccordeon");
 const ContentIFrame_1 = require("./data_objects/ContentIFrame");
-const Debug_1 = require("../Debug/Debug");
+const ContentArticleDataParagraph_1 = require("./data_objects/ContentArticleDataParagraph");
 const cheerio = require('cheerio');
 class TextExtractAMV {
     constructor(fpath_output_csv) {
@@ -246,11 +247,7 @@ class TextExtractAMV {
     _parse_accordeon(url, $, tag, result) {
         let _this = this;
         let title = null;
-        let article = null;
-        full;
-        width;
-        images;
-        ermitteln;
+        let articles = [];
         for (let each of tag.children) {
             if (each.type == 'tag') {
                 switch (each.name) {
@@ -262,23 +259,7 @@ class TextExtractAMV {
                         break;
                     case 'div':
                         if (/am-accordion-cnt-wrp/i.test($(each).prop('class'))) {
-                            $('.am-rt', each).each((i, element) => {
-                                let tmp_res = [];
-                                _this._parse_section_tag(url, $, element, tmp_res);
-                                if (tmp_res.length != 1) {
-                                    console.log(`${colors.magenta(new Debug_1.Debug().shortInfo())} :: ${colors.red("Error: No or too many article(s)!")} ${colors.red(` num=${tmp_res.length}`)} :: type=[${each.type}] name=[${each.name}] class=[${$(each).prop('class')}]`);
-                                    process.exit(1);
-                                }
-                                let tmp_article = tmp_res[0];
-                                if (tmp_article instanceof ContentArticle_1.ContentArticle) {
-                                    article = tmp_article;
-                                }
-                                else {
-                                    console.log(`${colors.magenta(new Debug_1.Debug().shortInfo())} :: ${colors.red("Error: <tmp_res> contains unknwon Objects!")}`);
-                                    console.dir(tmp_res, { colors: true });
-                                    process.exit(1);
-                                }
-                            });
+                            this._parse_accordeon_cntWrp(url, $, each, articles);
                         }
                         else {
                             console.log(`${colors.magenta(new Debug_1.Debug().shortInfo())} :: ${colors.red("Unknown DIV")} :: type=[${each.type}] name=[${each.name}] class=[${$(each).prop('class')}]`);
@@ -294,11 +275,91 @@ class TextExtractAMV {
             console.log(colors.red(`${colors.magenta(new Debug_1.Debug().shortInfo())} :: Error: <title> is empty! tag=[type=[${tag.type}] name=[${tag.name}] class=[${$(tag).prop('class')}]]`));
             process.exit(1);
         }
-        if (typeof (article) == 'undefined' || article == null) {
+        if (articles.length <= 0) {
             console.log(colors.red(`${colors.magenta(new Debug_1.Debug().shortInfo())} :: Error: <article> not found or is empty! tag=[type=[${tag.type}] name=[${tag.name}] class=[${$(tag).prop('class')}]]`));
             process.exit(1);
         }
-        result.push(new ContentAccordeon_1.ContentAccordeon(title, article));
+        result.push(new ContentAccordeon_1.ContentAccordeon(title, articles));
+    }
+    _parse_accordeon_cntWrp(url, $, tag, result) {
+        for (let each of tag.children) {
+            let tagObj = $(each);
+            let cls = tagObj.prop('class');
+            switch (each.type) {
+                case 'text': break;
+                case 'tag':
+                    if (/am-accordion-cnt/i.test(cls)) {
+                        this._parse_accordeon_cnt(url, $, each, result);
+                    }
+                    else {
+                        const txt_maxLen = 30;
+                        const txt = tagObj.text().trim().replace(/[\n\r]+/, '');
+                        console.log(`${colors.magenta(new Debug_1.Debug().shortInfo())} :: ${colors.red("Unknown #6 TAG")} :: type=[${each.type}] name=[${each.name}] class=[${cls}] text=[${txt.substr(0, txt_maxLen)}${txt.length > txt_maxLen ? "..." : ""}]`);
+                    }
+                    break;
+                default:
+                    {
+                        const txt_maxLen = 30;
+                        const txt = tagObj.text().trim().replace(/[\n\r]+/, '');
+                        console.log(`${colors.magenta(new Debug_1.Debug().shortInfo())} :: ${colors.red("Unknown #7")} :: type=[${each.type}] name=[${each.name}] class=[${cls}] text=[${txt.substr(0, txt_maxLen)}${txt.length > txt_maxLen ? "..." : ""}]`);
+                    }
+                    break;
+            }
+        }
+    }
+    _parse_accordeon_cnt(url, $, tag, result) {
+        let hasInteractiveModuleHeader = false;
+        {
+            const txt_maxLen = 30;
+            const txt = $(tag).text().trim().replace(/[\n\r]+/, '');
+        }
+        for (let each of tag.children) {
+            let tagObj = $(each);
+            let cls = tagObj.prop('class');
+            switch (each.type) {
+                case 'text':
+                    break;
+                case 'script':
+                    hasInteractiveModuleHeader = true;
+                    break;
+                case 'tag':
+                    let tag_id = tagObj.prop('id');
+                    if (/link/i.test(each.name)) {
+                        hasInteractiveModuleHeader = true;
+                    }
+                    else if (/div/i.test(each.name) && (hasInteractiveModuleHeader == true)) {
+                        hasInteractiveModuleHeader = false;
+                    }
+                    else if (/am-rt/i.test(cls)) {
+                        hasInteractiveModuleHeader = false;
+                        result.push(ContentArticle_1.ContentArticle.init(url, $, each));
+                    }
+                    else if (/p/i.test(each.name)) {
+                        hasInteractiveModuleHeader = false;
+                        let p = ContentArticleDataParagraph_1.ContentArticleDataParagraph.init(url, $, each, false);
+                        if (p.textComponents.length > 0) {
+                            let article = new ContentArticle_1.ContentArticle();
+                            article.data.push(p);
+                            result.push(article);
+                        }
+                    }
+                    else {
+                        hasInteractiveModuleHeader = false;
+                        const txt_maxLen = 30;
+                        const txt = tagObj.text().trim().replace(/[\n\r]+/, '');
+                        console.log(`${colors.magenta(new Debug_1.Debug().shortInfo())} :: ${colors.red("Unknown #8 TAG")} :: type=[${each.type}] name=[${each.name}] class=[${cls}] text=[${txt.substr(0, txt_maxLen)}${txt.length > txt_maxLen ? "..." : ""}]`);
+                    }
+                    break;
+                default:
+                    {
+                        hasInteractiveModuleHeader = false;
+                        const txt_maxLen = 30;
+                        const txt = tagObj.text().trim().replace(/[\n\r]+/, '');
+                        console.log(`${colors.magenta(new Debug_1.Debug().shortInfo())} :: ${colors.red("Unknown #9")} :: type=[${each.type}] name=[${each.name}] class=[${cls}] text=[${txt.substr(0, txt_maxLen)}${txt.length > txt_maxLen ? "..." : ""}]`);
+                    }
+                    break;
+            }
+        }
     }
 }
 exports.TextExtractAMV = TextExtractAMV;

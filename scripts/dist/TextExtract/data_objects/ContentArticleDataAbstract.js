@@ -11,7 +11,8 @@ var ArticleContentType;
     ArticleContentType["ul"] = "ul";
     ArticleContentType["ol"] = "ol";
     ArticleContentType["table"] = "table";
-    ArticleContentType["tooltip"] = "tooltip";
+    ArticleContentType["tooltip_central_priceCatcher"] = "tooltip.central.priceCatcher";
+    ArticleContentType["tooltip_amv"] = "tooltip.amv";
     ArticleContentType["download_link"] = "download_link";
 })(ArticleContentType = exports.ArticleContentType || (exports.ArticleContentType = {}));
 class ContentArticleDataAbstract {

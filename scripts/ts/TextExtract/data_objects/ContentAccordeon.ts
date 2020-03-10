@@ -6,12 +6,12 @@ import { ContentArticle } from './ContentArticle';
 export class ContentAccordeon extends ContentAbstract
 {
 	title: string
-	article: ContentArticle
+	articles: Array<ContentArticle>
 
-	constructor(title, article: ContentArticle)
+	constructor(title, articles: Array<ContentArticle>)
 	{
 		super(ContentType.accordeon)
 		this.title = title
-		this.article = article
+		this.articles = articles
 	}
 }

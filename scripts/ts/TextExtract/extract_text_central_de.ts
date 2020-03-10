@@ -12,6 +12,7 @@ es.extractFromUrl(
 	// 'https://www.central.de/gesundheitsangebote/aerztliche-beratung/videosprechstunde/',		// akkordeons
 	// 'https://www.central.de/gesundheitsangebote/aerztliche-beratung/',						// 3 teaser in einer Zeile
 	// 'https://www.central.de/produkte/zusatzversicherung/krankenzusatzversicherung/mein-zahnschutz/',
+	// 'https://www.central.de/produkte/',															// verteiler
 	true,
 	true,
 	true

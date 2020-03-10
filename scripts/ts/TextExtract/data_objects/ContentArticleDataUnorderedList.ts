@@ -51,7 +51,7 @@ export class ContentArticleDataUnorderedList extends ContentArticleDataAbstract
 				case 'tag':
 					if ( /li/i.test(each_tag.name) )
 					{
-						result.listItems.push( ContentArticleDataParagraph.init(url, $, each_tag) );
+						result.listItems.push( ContentArticleDataParagraph.init(url, $, each_tag, false) );
 					}
 					else
 					{

@@ -28,17 +28,28 @@ export class ContentArticle extends ContentAbstract
 		for( let each of tag.children )
 		{
 			if ( each.type != 'tag' ) continue
-			const cls = $(each).prop('class');
-			// console.log(`++ ${colors.magenta(new Debug().shortInfo())} :: type=[${each.type}] name=[${each.name}] class=[${cls}]`);
+			const tagObj = $(each);
+			const cls = tagObj.prop('class');
+			{
+				const txt_maxLen = 30;
+				const txt = tagObj.text().trim().replace(/[\n\r]+/, '');
+				// console.log(`++ ${colors.magenta(new Debug().shortInfo())} :: type=[${each.type}] name=[${each.name}] class=[${cls}] text=[${txt.substr(0, txt_maxLen)}${txt.length>txt_maxLen?"...":""}]`);
+			}
 			switch ( each.name )
 			{
 				case 'span':
-					article.data.push( ContentArticleDataTitle.init($, each) )
+					{
+						let t = ContentArticleDataTitle.init($, each);
+						if ( t.text.length > 0 )
+						{
+							article.data.push( t )
+						}
+					}
 					break;
 
 				case 'p':
-					let p = ContentArticleDataParagraph.init(currentUrl, $, each)
-					if ( p.text.length > 0 )
+					let p = ContentArticleDataParagraph.init(currentUrl, $, each, false)
+					if ( p.textComponents.length > 0 )
 					{
 						article.data.push( p )
 					}
@@ -54,7 +65,7 @@ export class ContentArticle extends ContentAbstract
 					break;
 
 				case 'table':
-					article.data.push( ContentArticleDataTable.init($, each) )
+					article.data.push( ContentArticleDataTable.init(currentUrl, $, each) )
 					break;
 
 				case 'div':

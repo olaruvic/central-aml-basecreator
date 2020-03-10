@@ -6,7 +6,7 @@ const ContentArticleDataAbstract_1 = require("./ContentArticleDataAbstract");
 const ContentArticle_1 = require("./ContentArticle");
 class ContentArticleDataPriceCatcher extends ContentArticleDataAbstract_1.ContentArticleDataAbstract {
     constructor() {
-        super(ContentArticleDataAbstract_1.ArticleContentType.tooltip);
+        super(ContentArticleDataAbstract_1.ArticleContentType.tooltip_central_priceCatcher);
         this.text = null;
         this.price = null;
         this.tooltip = null;

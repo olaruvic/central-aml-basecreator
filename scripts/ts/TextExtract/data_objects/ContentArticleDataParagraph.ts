@@ -4,10 +4,12 @@ import { ContentArticleDataAbstract, ArticleContentType } from './ContentArticle
 import { ParagraphContent } from './ParagraphContent';
 import { ContentArticleDataUnorderedList } from './ContentArticleDataUnorderedList';
 import { ContentArticleDataOrderedList } from './ContentArticleDataOrderedList';
+import { ContentArticleDataTooltip } from './ContentArticleDataTooltip';
 
 export enum ParagraphContentType {
 	text = 'text',
-	footnote = 'footnote'
+	footnote = 'footnote',
+	table_data = 'table_data'
 }
 
 export class ContentArticleDataParagraph extends ContentArticleDataAbstract
@@ -17,18 +19,23 @@ export class ContentArticleDataParagraph extends ContentArticleDataAbstract
 	className: string|undefined|null
 	textComponents: Array<ParagraphContent|ContentArticleDataAbstract>
 
-	constructor(text: string, className: string, textComponents: Array<ParagraphContent>)
+	constructor(paragraphContentType: ParagraphContentType, text: string, className: string, textComponents: Array<ParagraphContent>)
 	{
 		super(ArticleContentType.paragraph)
 		this.text = text.trim()
 		this.className = ( typeof(className)!='undefined' && className!=null ? className : null );
 		this.textComponents = textComponents
 		//
+		this.paragraphType = paragraphContentType;
 		this._initParagraphType()
 	}
 
 	private _initParagraphType()
 	{
+		if ( typeof(this.paragraphType)!='undefined' && this.paragraphType!=null )
+		{
+			return;		// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< return!
+		}
 		if ( typeof(this.className)=='undefined' || this.className==null ) 
 		{
 			this.paragraphType = ParagraphContentType.text;
@@ -43,10 +50,10 @@ export class ContentArticleDataParagraph extends ContentArticleDataAbstract
 		}
 	}
 
-	static init(currentUrl: string, $: any, tag: any): ContentArticleDataParagraph
+	static init(currentUrl: string, $: any, tag: any, isTableData: boolean): ContentArticleDataParagraph
 	{
 		const o = $(tag)
-		let result = new ContentArticleDataParagraph(o.text(), o.prop('class'), []);
+		let result = new ContentArticleDataParagraph((isTableData ? ParagraphContentType.table_data : null), o.text(), o.prop('class'), []);
 			result._parse(currentUrl, $, tag);
 		return result;
 	}
@@ -58,7 +65,7 @@ export class ContentArticleDataParagraph extends ContentArticleDataAbstract
 			const cls = $(each).prop('class');
 			const txt_maxLen = 30;
 			const txt = $(each).text().trim().replace(/[\n\r]+/, '');
-			// console.log(`${colors.magenta(new Debug().shortInfo())} :: type=[${each.type}] name=[${each.name}] class=[cls}] text=[${txt.substr(0, txt_maxLen)}${txt.length>txt_maxLen?"...":""}]`);
+			// console.log(`${colors.magenta(new Debug().shortInfo())} :: type=[${each.type}] name=[${each.name}] class=[${cls}] text=[${txt.substr(0, txt_maxLen)}${txt.length>txt_maxLen?"...":""}]`);
 			switch ( each.type )
 			{
 				case 'text': 
@@ -100,6 +107,10 @@ export class ContentArticleDataParagraph extends ContentArticleDataAbstract
 							if ( /cm-image/.test(cls) )
 							{
 								this._parse(currentUrl, $, each);
+							}
+							else if ( /tooltip/.test(cls) )
+							{
+								this.textComponents.push( ContentArticleDataTooltip.init_amv(currentUrl, $, each) );
 							}
 							else
 							{

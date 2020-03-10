@@ -23,7 +23,7 @@ class ContentArticleDataOrderedList extends ContentArticleDataAbstract_1.Content
                 case 'text': break;
                 case 'tag':
                     if (/li/i.test(each_tag.name)) {
-                        result.listItems.push(ContentArticleDataParagraph_1.ContentArticleDataParagraph.init(url, $, each_tag));
+                        result.listItems.push(ContentArticleDataParagraph_1.ContentArticleDataParagraph.init(url, $, each_tag, false));
                     }
                     else {
                         const txt_maxLen = 30;

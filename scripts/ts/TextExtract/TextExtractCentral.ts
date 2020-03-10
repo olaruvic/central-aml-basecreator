@@ -194,7 +194,7 @@ console.log(JSON.stringify(result))
 
 	private _parse_sections(url: string, $: any, sections: any, result: Array<any>)
 	{
-		let _this = this;
+		/*let _this = this;
 		sections.each(function(i, elem) {
 			console.log("################################################################ _parse_sections".yellow)
 			// let cls = $(this).prop('class')
@@ -207,7 +207,7 @@ console.log(JSON.stringify(result))
 					{
 						case 'text': 
 						case 'script':
-							/* ignore whitespaces */ 
+							// ignore whitespaces
 							break;
 
 						case 'tag': 
@@ -224,7 +224,34 @@ console.log(JSON.stringify(result))
 					}
 				}
 			// }
-		})
+		})*/
+		for (let idx = 0; idx < sections.length; idx++)
+		{
+			let each_tag_found = sections.get(idx)
+			for( let each_tag of each_tag_found.children )
+			{
+				let tagObj = $(each_tag);
+				switch ( each_tag.type )
+				{
+					case 'text': 
+					case 'script':
+						// ignore whitespaces
+						break;
+
+					case 'tag': 
+						this._parse_section_tag(url, $, each_tag, result);
+						break;
+
+					default:
+						{
+							const txt_maxLen = 30;
+							const txt = $(each_tag).text().trim().replace(/[\n\r]+/, '');
+							console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #1")} :: type=[${each_tag.type}] name=[${each_tag.name}] class=[${$(each_tag).prop('class')}] text=[${txt.substr(0, txt_maxLen)}${txt.length>txt_maxLen?"...":""}]`);
+						}
+						break;
+				}
+			}
+		}
 	}
 
 	private _parse_section_tag(url: string, $: any, tag: any, result: Array<any>)
@@ -510,7 +537,7 @@ console.log(JSON.stringify(result))
 	private _parse_module_collapsible_panel(url: string, $: any, tag: any, result: Array<any>)
 	{
 		let title: string = null
-		let article: ContentArticle = null
+		let articles: Array<ContentArticle> = []
 		//
 		// console.log(`${colors.magenta(new Debug().shortInfo())} :: type=[${tag.type}] name=[${tag.name}] class=[${$(tag).prop('class')}]`);
 		for( let each_tag of tag.children )
@@ -538,7 +565,7 @@ console.log(JSON.stringify(result))
 						let panel_content = tagObj.find('.rte-content')
 						if ( panel_content.length > 0 )
 						{
-							article = ContentArticle.init(url, $, panel_content[0]);
+							articles.push( ContentArticle.init(url, $, panel_content[0]) );
 						}
 						else
 						{
@@ -570,11 +597,11 @@ console.log(JSON.stringify(result))
 			console.log(colors.red(`${colors.magenta(new Debug().shortInfo())} :: Error: <title> is empty! tag=[type=[${tag.type}] name=[${tag.name}] class=[${$(tag).prop('class')}]]`))
 			process.exit(1);
 		}
-		if ( typeof(article)=='undefined' || article==null )
+		if ( articles.length <= 0 )
 		{
 			console.log(colors.red(`${colors.magenta(new Debug().shortInfo())} :: Error: <article> not found or is empty! tag=[type=[${tag.type}] name=[${tag.name}] class=[${$(tag).prop('class')}]]`))
 			process.exit(1);
 		}
-		result.push( new ContentAccordeon(title, article) )
+		result.push( new ContentAccordeon(title, articles) )
 	}
 }

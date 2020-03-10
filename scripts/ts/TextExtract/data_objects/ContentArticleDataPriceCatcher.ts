@@ -12,7 +12,7 @@ export class ContentArticleDataPriceCatcher extends ContentArticleDataAbstract
 
 	constructor()
 	{
-		super(ArticleContentType.tooltip)
+		super(ArticleContentType.tooltip_central_priceCatcher)
 		this.text = null
 		this.price = null
 		this.tooltip = null

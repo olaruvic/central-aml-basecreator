@@ -6,20 +6,26 @@ const ContentArticleDataAbstract_1 = require("./ContentArticleDataAbstract");
 const ParagraphContent_1 = require("./ParagraphContent");
 const ContentArticleDataUnorderedList_1 = require("./ContentArticleDataUnorderedList");
 const ContentArticleDataOrderedList_1 = require("./ContentArticleDataOrderedList");
+const ContentArticleDataTooltip_1 = require("./ContentArticleDataTooltip");
 var ParagraphContentType;
 (function (ParagraphContentType) {
     ParagraphContentType["text"] = "text";
     ParagraphContentType["footnote"] = "footnote";
+    ParagraphContentType["table_data"] = "table_data";
 })(ParagraphContentType = exports.ParagraphContentType || (exports.ParagraphContentType = {}));
 class ContentArticleDataParagraph extends ContentArticleDataAbstract_1.ContentArticleDataAbstract {
-    constructor(text, className, textComponents) {
+    constructor(paragraphContentType, text, className, textComponents) {
         super(ContentArticleDataAbstract_1.ArticleContentType.paragraph);
         this.text = text.trim();
         this.className = (typeof (className) != 'undefined' && className != null ? className : null);
         this.textComponents = textComponents;
+        this.paragraphType = paragraphContentType;
         this._initParagraphType();
     }
     _initParagraphType() {
+        if (typeof (this.paragraphType) != 'undefined' && this.paragraphType != null) {
+            return;
+        }
         if (typeof (this.className) == 'undefined' || this.className == null) {
             this.paragraphType = ParagraphContentType.text;
         }
@@ -30,9 +36,9 @@ class ContentArticleDataParagraph extends ContentArticleDataAbstract_1.ContentAr
             console.log(`${colors.magenta(new Debug_1.Debug().shortInfo())} :: ${colors.red('Unknown')} :: className=[${this.className}]`);
         }
     }
-    static init(currentUrl, $, tag) {
+    static init(currentUrl, $, tag, isTableData) {
         const o = $(tag);
-        let result = new ContentArticleDataParagraph(o.text(), o.prop('class'), []);
+        let result = new ContentArticleDataParagraph((isTableData ? ParagraphContentType.table_data : null), o.text(), o.prop('class'), []);
         result._parse(currentUrl, $, tag);
         return result;
     }
@@ -71,6 +77,9 @@ class ContentArticleDataParagraph extends ContentArticleDataAbstract_1.ContentAr
                         case 'span':
                             if (/cm-image/.test(cls)) {
                                 this._parse(currentUrl, $, each);
+                            }
+                            else if (/tooltip/.test(cls)) {
+                                this.textComponents.push(ContentArticleDataTooltip_1.ContentArticleDataTooltip.init_amv(currentUrl, $, each));
                             }
                             else {
                                 console.log(`${colors.magenta(new Debug_1.Debug().shortInfo())} :: ${colors.red("Unknown SPAN")} :: type=[${each.type}] name=[${each.name}] class=[${cls}] text=[${txt.substr(0, txt_maxLen)}${txt.length > txt_maxLen ? "..." : ""}]`);

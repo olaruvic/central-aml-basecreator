@@ -21,14 +21,24 @@ class ContentArticle extends ContentAbstract_1.ContentAbstract {
         for (let each of tag.children) {
             if (each.type != 'tag')
                 continue;
-            const cls = $(each).prop('class');
+            const tagObj = $(each);
+            const cls = tagObj.prop('class');
+            {
+                const txt_maxLen = 30;
+                const txt = tagObj.text().trim().replace(/[\n\r]+/, '');
+            }
             switch (each.name) {
                 case 'span':
-                    article.data.push(ContentArticleDataTitle_1.ContentArticleDataTitle.init($, each));
+                    {
+                        let t = ContentArticleDataTitle_1.ContentArticleDataTitle.init($, each);
+                        if (t.text.length > 0) {
+                            article.data.push(t);
+                        }
+                    }
                     break;
                 case 'p':
-                    let p = ContentArticleDataParagraph_1.ContentArticleDataParagraph.init(currentUrl, $, each);
-                    if (p.text.length > 0) {
+                    let p = ContentArticleDataParagraph_1.ContentArticleDataParagraph.init(currentUrl, $, each, false);
+                    if (p.textComponents.length > 0) {
                         article.data.push(p);
                     }
                     break;
@@ -39,7 +49,7 @@ class ContentArticle extends ContentAbstract_1.ContentAbstract {
                     article.data.push(ContentArticleDataOrderedList_1.ContentArticleDataOrderedList.init(currentUrl, $, each));
                     break;
                 case 'table':
-                    article.data.push(ContentArticleDataTable_1.ContentArticleDataTable.init($, each));
+                    article.data.push(ContentArticleDataTable_1.ContentArticleDataTable.init(currentUrl, $, each));
                     break;
                 case 'div':
                     if (/pricetag-inner/i.test(cls)) {
