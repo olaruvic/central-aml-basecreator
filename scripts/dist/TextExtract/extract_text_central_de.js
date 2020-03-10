@@ -4,4 +4,4 @@ const TextExtractCentral_1 = require("./TextExtractCentral");
 const path = require("path");
 let output_fpath = path.join('/Users', 'victorolaru', 'Desktop', 'text.json');
 let es = new TextExtractCentral_1.TextExtractCentral(output_fpath);
-es.extractFromUrl('https://www.central.de/produkte/vollversicherung/fuer-selbststaendige-und-arbeitnehmer/komfortschutz/', true, true, true);
+es.extractFromUrl('https://www.central.de/produkte/', true, true, true);

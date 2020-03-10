@@ -178,9 +178,10 @@ process.exit(1);
 		const $ = cheerio.load(html_body)
 		//
 		let result = [];
-		this._parse_sections( url, $, $('article'), result );
-// console.log(`${new Debug().shortInfo()} :: ${"DEBUG HALT".bold}`.bgRed.white);
-// process.exit(1);
+		this._parse_defaultContent_sections( url, $, $('article'), result );		// normaler Inhalt enthalten in <div class="content default">...<article class="...">...</article>...</div>
+		this._parse_homeContent_sections( url, $, $('.content.home'), result);		// Verteiler enthalten in <div class="content home">...</div>
+console.log(`${new Debug().shortInfo()} :: ${"DEBUG HALT".bold}`.bgRed.white);
+process.exit(1);
 console.log("------------------------------------------------");
 console.dir(result, {colors: true, depth: 100})
 console.log("------------------------------------------------");
@@ -192,45 +193,15 @@ console.log(JSON.stringify(result))
 		});*/
 	}
 
-	private _parse_sections(url: string, $: any, sections: any, result: Array<any>)
+	private _parse_defaultContent_sections(url: string, $: any, sections: any, result: Array<any>)
 	{
-		/*let _this = this;
-		sections.each(function(i, elem) {
-			console.log("################################################################ _parse_sections".yellow)
-			// let cls = $(this).prop('class')
-			// if ( typeof(cls)=='undefined' || cls==null || cls.trim().length<=0 )
-			// {
-				for (let each_tag of elem.children)
-				{
-					let tagObj = $(each_tag);
-					switch ( each_tag.type )
-					{
-						case 'text': 
-						case 'script':
-							// ignore whitespaces
-							break;
-
-						case 'tag': 
-							_this._parse_section_tag(url, $, each_tag, result);
-							break;
-
-						default:
-							{
-								const txt_maxLen = 30;
-								const txt = $(each_tag).text().trim().replace(/[\n\r]+/, '');
-								console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #1")} :: type=[${each_tag.type}] name=[${each_tag.name}] class=[${$(each_tag).prop('class')}] text=[${txt.substr(0, txt_maxLen)}${txt.length>txt_maxLen?"...":""}]`);
-							}
-							break;
-					}
-				}
-			// }
-		})*/
 		for (let idx = 0; idx < sections.length; idx++)
 		{
 			let each_tag_found = sections.get(idx)
 			for( let each_tag of each_tag_found.children )
 			{
 				let tagObj = $(each_tag);
+				let cls = tagObj.prop('class');
 				switch ( each_tag.type )
 				{
 					case 'text': 
@@ -246,7 +217,52 @@ console.log(JSON.stringify(result))
 						{
 							const txt_maxLen = 30;
 							const txt = $(each_tag).text().trim().replace(/[\n\r]+/, '');
-							console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #1")} :: type=[${each_tag.type}] name=[${each_tag.name}] class=[${$(each_tag).prop('class')}] text=[${txt.substr(0, txt_maxLen)}${txt.length>txt_maxLen?"...":""}]`);
+							console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #1")} :: type=[${each_tag.type}] name=[${each_tag.name}] class=[${cls}] text=[${txt.substr(0, txt_maxLen)}${txt.length>txt_maxLen?"...":""}]`);
+						}
+						break;
+				}
+			}
+		}
+	}
+
+	private _parse_homeContent_sections(url: string, $: any, sections: any, result: Array<any>)
+	{
+		for (let idx = 0; idx < sections.length; idx++)
+		{
+			let each_tag_found = sections.get(idx)
+			for( let each_tag of each_tag_found.children )
+			{
+				let tagObj = $(each_tag);
+				let cls = tagObj.prop('class');
+				switch ( each_tag.type )
+				{
+					case 'text': 
+					case 'script':
+						// ignore whitespaces
+						break;
+
+					case 'tag': 
+						if ( /cookies/i.test(cls) )
+						{
+							// ignore
+						}
+						else if ( /main/i.test(cls))
+						{
+							this._parse_homeContent_childs(url, $, each_tag, result);
+						}
+						else 
+						{
+							const txt_maxLen = 30;
+							const txt = $(each_tag).text().trim().replace(/[\n\r]+/, '');
+							console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown TAG #2.a")} :: type=[${each_tag.type}] name=[${each_tag.name}] class=[${cls}] text=[${txt.substr(0, txt_maxLen)}${txt.length>txt_maxLen?"...":""}]`);
+						}
+						break;
+
+					default:
+						{
+							const txt_maxLen = 30;
+							const txt = $(each_tag).text().trim().replace(/[\n\r]+/, '');
+							console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #2.b")} :: type=[${each_tag.type}] name=[${each_tag.name}] class=[${cls}] text=[${txt.substr(0, txt_maxLen)}${txt.length>txt_maxLen?"...":""}]`);
 						}
 						break;
 				}
@@ -274,12 +290,12 @@ console.log(JSON.stringify(result))
 				else
 				{
 					// result.push( ContentArticle.init(url, $, tag) );
-					console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #2")} :: type=[${tag.type}] name=[${tag.name}] class=[${$(tag).prop('class')}]`);
+					console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #3")} :: type=[${tag.type}] name=[${tag.name}] class=[${$(tag).prop('class')}]`);
 				}
 				break;
 			
 			default: 
-				console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #3")} :: type=[${tag.type}] name=[${tag.name}] class=[${$(tag).prop('class')}]`);
+				console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #4")} :: type=[${tag.type}] name=[${tag.name}] class=[${$(tag).prop('class')}]`);
 				break;
 		}
 	}
@@ -314,7 +330,7 @@ console.log(JSON.stringify(result))
 					{
 						const txt_maxLen = 30;
 						const txt = $(each_tag).text().trim().replace(/[\n\r]+/, '');
-						console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #4")} :: type=[${each_tag.type}] name=[${each_tag.name}] class=[${$(each_tag).prop('class')}] text=[${txt.substr(0, txt_maxLen)}${txt.length>txt_maxLen?"...":""}]`);
+						console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #5")} :: type=[${each_tag.type}] name=[${each_tag.name}] class=[${$(each_tag).prop('class')}] text=[${txt.substr(0, txt_maxLen)}${txt.length>txt_maxLen?"...":""}]`);
 					}
 					break;
 				
@@ -322,7 +338,7 @@ console.log(JSON.stringify(result))
 					{
 						const txt_maxLen = 30;
 						const txt = $(each_tag).text().trim().replace(/[\n\r]+/, '');
-						console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #5")} :: type=[${each_tag.type}] name=[${each_tag.name}] class=[${cls}] text=[${txt.substr(0, txt_maxLen)}${txt.length>txt_maxLen?"...":""}]`);
+						console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #6")} :: type=[${each_tag.type}] name=[${each_tag.name}] class=[${cls}] text=[${txt.substr(0, txt_maxLen)}${txt.length>txt_maxLen?"...":""}]`);
 					}
 					break;
 			}
@@ -376,7 +392,7 @@ console.log(JSON.stringify(result))
 					{
 						const txt_maxLen = 30;
 						const txt = $(each_tag).text().trim().replace(/[\n\r]+/, '');
-						console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #6")} :: type=[${each_tag.type}] name=[${each_tag.name}] class=[${$(each_tag).prop('class')}] text=[${txt.substr(0, txt_maxLen)}${txt.length>txt_maxLen?"...":""}]`);
+						console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #7")} :: type=[${each_tag.type}] name=[${each_tag.name}] class=[${$(each_tag).prop('class')}] text=[${txt.substr(0, txt_maxLen)}${txt.length>txt_maxLen?"...":""}]`);
 					}
 					break;
 				
@@ -384,7 +400,7 @@ console.log(JSON.stringify(result))
 					{
 						const txt_maxLen = 30;
 						const txt = $(each_tag).text().trim().replace(/[\n\r]+/, '');
-						console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #7")} :: type=[${each_tag.type}] name=[${each_tag.name}] class=[${cls}] text=[${txt.substr(0, txt_maxLen)}${txt.length>txt_maxLen?"...":""}]`);
+						console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #8")} :: type=[${each_tag.type}] name=[${each_tag.name}] class=[${cls}] text=[${txt.substr(0, txt_maxLen)}${txt.length>txt_maxLen?"...":""}]`);
 					}
 					break;
 			}
@@ -414,7 +430,7 @@ console.log(JSON.stringify(result))
 	// 				{
 	// 					const txt_maxLen = 30;
 	// 					const txt = $(each_tag).text().trim().replace(/[\n\r]+/, '');
-	// 					console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #8")} :: type=[${each_tag.type}] name=[${each_tag.name}] class=[${cls}] text=[${txt.substr(0, txt_maxLen)}${txt.length>txt_maxLen?"...":""}]`);
+	// 					console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #9")} :: type=[${each_tag.type}] name=[${each_tag.name}] class=[${cls}] text=[${txt.substr(0, txt_maxLen)}${txt.length>txt_maxLen?"...":""}]`);
 	// 				}
 	// 				break;
 	// 		}
@@ -441,7 +457,7 @@ console.log(JSON.stringify(result))
 					{
 						const txt_maxLen = 30;
 						const txt = $(each_tag).text().trim().replace(/[\n\r]+/, '');
-						console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #9")} :: type=[${each_tag.type}] name=[${each_tag.name}] class=[${cls}] text=[${txt.substr(0, txt_maxLen)}${txt.length>txt_maxLen?"...":""}]`);
+						console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #10")} :: type=[${each_tag.type}] name=[${each_tag.name}] class=[${cls}] text=[${txt.substr(0, txt_maxLen)}${txt.length>txt_maxLen?"...":""}]`);
 					}
 					break;
 
@@ -449,7 +465,7 @@ console.log(JSON.stringify(result))
 					{
 						const txt_maxLen = 30;
 						const txt = $(each_tag).text().trim().replace(/[\n\r]+/, '');
-						console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #10")} :: type=[${each_tag.type}] name=[${each_tag.name}] class=[${cls}] text=[${txt.substr(0, txt_maxLen)}${txt.length>txt_maxLen?"...":""}]`);
+						console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #11")} :: type=[${each_tag.type}] name=[${each_tag.name}] class=[${cls}] text=[${txt.substr(0, txt_maxLen)}${txt.length>txt_maxLen?"...":""}]`);
 					}
 					break;
 			}
@@ -476,7 +492,7 @@ console.log(JSON.stringify(result))
 					{
 						const txt_maxLen = 30;
 						const txt = $(each_tag).text().trim().replace(/[\n\r]+/, '');
-						console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #11")} :: type=[${each_tag.type}] name=[${each_tag.name}] class=[${cls}] text=[${txt.substr(0, txt_maxLen)}${txt.length>txt_maxLen?"...":""}]`);
+						console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #12")} :: type=[${each_tag.type}] name=[${each_tag.name}] class=[${cls}] text=[${txt.substr(0, txt_maxLen)}${txt.length>txt_maxLen?"...":""}]`);
 					}
 					break;
 
@@ -484,7 +500,7 @@ console.log(JSON.stringify(result))
 					{
 						const txt_maxLen = 30;
 						const txt = $(each_tag).text().trim().replace(/[\n\r]+/, '');
-						console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #12")} :: type=[${each_tag.type}] name=[${each_tag.name}] class=[${$(each_tag).prop('class')}]`);
+						console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #13")} :: type=[${each_tag.type}] name=[${each_tag.name}] class=[${$(each_tag).prop('class')}]`);
 					}
 					break;
 			}
@@ -519,7 +535,7 @@ console.log(JSON.stringify(result))
 					{
 						const txt_maxLen = 30;
 						const txt = $(each_tag).text().trim().replace(/[\n\r]+/, '');
-						console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #13")} :: type=[${each_tag.type}] name=[${each_tag.name}] class=[${cls}] text=[${txt.substr(0, txt_maxLen)}${txt.length>txt_maxLen?"...":""}]`);
+						console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #14")} :: type=[${each_tag.type}] name=[${each_tag.name}] class=[${cls}] text=[${txt.substr(0, txt_maxLen)}${txt.length>txt_maxLen?"...":""}]`);
 					}
 					break;
 
@@ -527,7 +543,7 @@ console.log(JSON.stringify(result))
 					{
 						const txt_maxLen = 30;
 						const txt = $(each_tag).text().trim().replace(/[\n\r]+/, '');
-						console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #14")} :: type=[${each_tag.type}] name=[${each_tag.name}] class=[${$(each_tag).prop('class')}]`);
+						console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #15")} :: type=[${each_tag.type}] name=[${each_tag.name}] class=[${$(each_tag).prop('class')}]`);
 					}
 					break;
 			}
@@ -578,7 +594,7 @@ console.log(JSON.stringify(result))
 					{
 						const txt_maxLen = 30;
 						const txt = $(each_tag).text().trim().replace(/[\n\r]+/, '');
-						console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #15")} :: type=[${each_tag.type}] name=[${each_tag.name}] class=[${cls}] text=[${txt.substr(0, txt_maxLen)}${txt.length>txt_maxLen?"...":""}]`);
+						console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #16")} :: type=[${each_tag.type}] name=[${each_tag.name}] class=[${cls}] text=[${txt.substr(0, txt_maxLen)}${txt.length>txt_maxLen?"...":""}]`);
 					}
 					break;
 
@@ -586,7 +602,7 @@ console.log(JSON.stringify(result))
 					{
 						const txt_maxLen = 30;
 						const txt = $(each_tag).text().trim().replace(/[\n\r]+/, '');
-						console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #16")} :: type=[${each_tag.type}] name=[${each_tag.name}] class=[${$(each_tag).prop('class')}]`);
+						console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #17")} :: type=[${each_tag.type}] name=[${each_tag.name}] class=[${$(each_tag).prop('class')}]`);
 					}
 					break;
 			}
@@ -603,5 +619,42 @@ console.log(JSON.stringify(result))
 			process.exit(1);
 		}
 		result.push( new ContentAccordeon(title, articles) )
+	}
+
+	private _parse_homeContent_childs(url: string, $: any, tag: any, result: Array<any>)
+	{
+		// console.log(`${colors.magenta(new Debug().shortInfo())} :: type=[${tag.type}] name=[${tag.name}] class=[${$(tag).prop('class')}]`);
+		for( let each_tag of tag.children )
+		{
+			const cls = $(each_tag).prop('class');
+			const tagObj = $(each_tag);
+			switch ( each_tag.type )
+			{
+				case 'text': /* ignore */ break;
+
+				case 'tag':
+					// if ( /module-stage/i.test(cls) )
+					// {
+					// }
+					// else if ( /page-grid/i.test(cls) )
+					// {
+					// }
+					// else
+					{
+						const txt_maxLen = 30;
+						const txt = $(each_tag).text().trim().replace(/[\n\r]+/, '');
+						console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #18")} :: type=[${each_tag.type}] name=[${each_tag.name}] class=[${cls}] text=[${txt.substr(0, txt_maxLen)}${txt.length>txt_maxLen?"...":""}]`);
+					}
+					break;
+
+				default:
+					{
+						const txt_maxLen = 30;
+						const txt = $(each_tag).text().trim().replace(/[\n\r]+/, '');
+						console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #19")} :: type=[${each_tag.type}] name=[${each_tag.name}] class=[${$(each_tag).prop('class')}]`);
+					}
+					break;
+			}
+		}
 	}
 }
