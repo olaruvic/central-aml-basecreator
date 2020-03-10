@@ -11,6 +11,9 @@ class ContentTitle_central extends ContentTitle_amv_1.ContentTitle_amv {
         this.text = text.trim();
         this.subtitle = subtitle.trim();
     }
+    getImages() {
+        return [];
+    }
     static init_central(url, $, tag) {
         const page_header = $(tag).find('.page-header');
         if (page_header.length <= 0) {

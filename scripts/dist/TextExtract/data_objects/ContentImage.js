@@ -17,6 +17,9 @@ class ContentImage extends ContentAbstract_1.ContentAbstract {
             }
         }
     }
+    getImages() {
+        return [this];
+    }
     static init(currentUrl, $, tag) {
         let tagObj = $(tag);
         let img_src = tagObj.prop('src').trim();

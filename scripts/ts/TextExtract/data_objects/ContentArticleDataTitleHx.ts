@@ -1,5 +1,6 @@
 const colors = require('colors');
 import { ContentArticleDataAbstract, ArticleContentType } from './ContentArticleDataAbstract';
+import { ContentImage } from './ContentImage';
 
 export class ContentArticleDataTitleHx extends ContentArticleDataAbstract
 {
@@ -11,6 +12,11 @@ export class ContentArticleDataTitleHx extends ContentArticleDataAbstract
 		super(cType)
 		this.text = text.trim()
 		this.className = className
+	}
+
+	getImages(): Array<ContentImage>
+	{
+		return []
 	}
 
 	static init_h2($: any, tag: any): ContentArticleDataTitleHx

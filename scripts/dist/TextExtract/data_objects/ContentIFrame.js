@@ -8,6 +8,9 @@ class ContentIFrame extends ContentAbstract_1.ContentAbstract {
         super(ContentAbstract_1.ContentType.img);
         this.url = url.trim();
     }
+    getImages() {
+        return [];
+    }
     static init(currentUrl, $, tag) {
         let img_src = $(tag).prop('src');
         let rootUrl = "";

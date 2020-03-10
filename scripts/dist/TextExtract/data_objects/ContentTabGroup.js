@@ -17,6 +17,13 @@ class ContentTabGroup extends ContentAbstract_1.ContentAbstract {
         result._parse(url, $, tag);
         return result;
     }
+    getImages() {
+        let result = [];
+        for (let each of this.tabs) {
+            result = result.concat(each.getImages());
+        }
+        return result;
+    }
     _parse(url, $, tag) {
         let tab_headers = [];
         let tab_contents = {};

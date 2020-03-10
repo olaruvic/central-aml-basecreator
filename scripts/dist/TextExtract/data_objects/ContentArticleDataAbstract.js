@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const colors = require('colors');
+const Debug_1 = require("../../Debug/Debug");
 var ArticleContentType;
 (function (ArticleContentType) {
     ArticleContentType["title"] = "title";
@@ -19,6 +20,11 @@ class ContentArticleDataAbstract {
     constructor(type) {
         this.type = type;
         this.isPrimitive = false;
+    }
+    getImages() {
+        console.log(`Error (${new Debug_1.Debug().shortInfo()}): Superclass responsibility!`.red.white.bold);
+        process.exit(1);
+        return [];
     }
 }
 exports.ContentArticleDataAbstract = ContentArticleDataAbstract;

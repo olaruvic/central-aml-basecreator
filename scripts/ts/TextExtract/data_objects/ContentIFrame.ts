@@ -1,6 +1,7 @@
 const colors = require('colors');
 const URL = require('url')
 import { ContentAbstract, ContentType } from './ContentAbstract';
+import { ContentImage } from './ContentImage';
 
 export class ContentIFrame extends ContentAbstract
 {
@@ -10,6 +11,11 @@ export class ContentIFrame extends ContentAbstract
 	{
 		super(ContentType.img)
 		this.url = url.trim()
+	}
+
+	getImages(): Array<ContentImage>
+	{
+		return []
 	}
 
 	static init(currentUrl: string, $: any, tag: any): ContentIFrame

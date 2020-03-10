@@ -30,6 +30,19 @@ export class ParagraphContent
 		this.isPrimitive = true			// true := ParagraphContent, false := ContentArticleDataAbstract
 	}
 
+	getImages(): Array<ContentImage>
+	{
+		let result = []
+		if ( typeof(this.img_src)!='undefined' && this.img_src!=null )
+		{
+			for (let each of this.img_src)
+			{
+				result.push( new ContentImage(this.img_src) )
+			}
+		}
+		return result
+	}
+
 	static initText($: any, tag: any): ParagraphContent
 	{
 		let res = new ParagraphContent(ParagraphContentPrimitiveType.text)

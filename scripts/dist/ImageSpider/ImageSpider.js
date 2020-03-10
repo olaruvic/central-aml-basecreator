@@ -5,12 +5,14 @@ const fs = require("fs");
 const fse = require("fs-extra");
 const path = require("path");
 const colors = require("colors");
+const Debug_1 = require("../Debug/Debug");
 const s2f = require("../StringToFile/stringToFile");
 let needle = require('needle');
 let cheerio = require('cheerio');
 let _url = require('url');
-const CreateFolders_1 = require("../CreateFolders/CreateFolders");
 require("../String-extensions");
+const CreateFolders_1 = require("../CreateFolders/CreateFolders");
+const TextExtractAMV_1 = require("../TextExtract/TextExtractAMV");
 const EMPTY = '--empty--';
 var ImageDownloadDataSourceType;
 (function (ImageDownloadDataSourceType) {
@@ -125,7 +127,7 @@ class ImageSpider {
             console.log(colors.cyan.bold((this.site_enum_idx <= 0 ? 1 : this.site_enum_idx) + " of " + this.url_list.length), ':', url_data.url);
             needle.get(url_data.url, function (err, res, body) {
                 if (!err) {
-                    _this._html_getImageSources(url_data, body, function () { _this._read_next_url(); });
+                    _this._html_processSite(url_data, body, function () { _this._read_next_url(); });
                 }
                 else {
                     _this._read_next_url();
@@ -142,23 +144,7 @@ class ImageSpider {
             }
         }
     }
-    _checkAndFormatLocalURL(href, origin) {
-        let url_obj = new _url.URL(origin);
-        let host_name = url_obj.hostname;
-        if (href.match(/^https?:\/\//i) != null) {
-            if (host_name.match(/www\./i) != null) {
-                host_name = host_name.substr(4);
-            }
-            let regex = new RegExp('^https?:\/\/(www\.)?' + host_name, 'i');
-            if (href.match(regex) != null) {
-                return href;
-            }
-            return null;
-        }
-        let imageURL = origin.replace(/[\/\\]$/i, '') + '/' + href.replace(/^[\/\\]/i, '');
-        return imageURL;
-    }
-    _html_getImageSources(url_data, html_body, callback = null) {
+    _html_processSite(url_data, html_body, callback = null) {
         const $ = cheerio.load(html_body, {});
         let _this = this;
         let url_obj = new _url.URL(url_data.url);
@@ -169,126 +155,16 @@ class ImageSpider {
         let target_path = path.join(url_data.target_path, '_content', __tmp_target_dirName);
         this._createSourceURLFile(target_path, url_data.url);
         this.downloadImages_list = [];
-        $('img').each(function (i, e) {
-            if (($(this).attr())['data-responsive-image']) {
-                let img_src = JSON.parse(($(this).attr())['data-responsive-image']);
-                for (let each_ratio in img_src) {
-                    let ratio_data = img_src[each_ratio];
-                    for (let each_size in ratio_data) {
-                        let orig_src = ratio_data[each_size];
-                        let src_name_ext = `---${each_ratio}---${each_size}`;
-                        _this.downloadImages_list.push(new ImageDownloadData(ImageDownloadDataSourceType.img, null, url_data.url, '.img ', orig_src, src_name_ext, origin, target_path, 'images', __tmp_dirName));
-                    }
-                }
-            }
-            else if ($(this).attr().src.trim().length > 0) {
-                _this.downloadImages_list.push(new ImageDownloadData(ImageDownloadDataSourceType.img, null, url_data.url, '.img ', $(this).attr().src, null, origin, target_path, 'images', __tmp_dirName));
-            }
-            else {
-                console.log(colors.bgRed("--------" + i + " :: UNKNOWN.img: "), $(this).attr());
-            }
-        });
-        $('link').each(function (i, e) {
-            let attrs = $(this).attr();
-            if (attrs.rel.trim().toLowerCase() == 'stylesheet' && attrs.href.length > 0) {
-                let href = _this._checkAndFormatLocalURL(attrs.href, origin);
-                if (href != null) {
-                    _this.downloadImages_list.push(new ImageDownloadData(ImageDownloadDataSourceType.css, href, url_data.url, '.link', null, null, origin, target_path, null, __tmp_dirName));
-                }
-                else {
-                    console.log(colors.bgRed("--------" + i + " :: external URL: "), attrs);
-                }
-            }
-            else if (attrs.rel.trim().toLowerCase() == 'canonical' && attrs.href.length > 0) {
-            }
-            else {
-                console.log(colors.bgRed("--------" + i + " :: UNKNOWN.css: "), attrs);
-            }
-        });
-        this.downloadImages_enum_idx = 0;
-        this.downloadImages_callback = callback;
-        this._download_next_image();
-    }
-    _download_next_image() {
-        if (this.downloadImages_enum_idx < this.downloadImages_list.length) {
-            let _this = this;
-            let nextImg = this.downloadImages_list[this.downloadImages_enum_idx];
-            this.downloadImages_enum_idx += 1;
-            switch (nextImg.source_type) {
-                case ImageDownloadDataSourceType.img:
-                    this._copyImage(nextImg.source_url, nextImg.source_type_str, nextImg.raw_image_url, nextImg.image_name_ext, nextImg.origin, nextImg.target_path, nextImg.target_path_subdir, nextImg.tmp_dirName, function () {
-                        _this._download_next_image();
-                    });
-                    break;
-                case ImageDownloadDataSourceType.css:
-                    needle.get(nextImg.css_file_url, function (err, resp, body) {
-                        if (!err) {
-                            _this._css_getImageSources(nextImg.source_url, nextImg.source_type_str, body, nextImg.origin, nextImg.target_path, nextImg.tmp_dirName, function () {
-                                _this._download_next_image();
-                            });
-                        }
-                        else {
-                            console.log(colors.bgRed.white('############################## Error downloading css file'));
-                            console.log(err);
-                            if (typeof (_this._download_next_image) != 'undefined' && _this._download_next_image != null) {
-                                _this._download_next_image();
-                            }
-                        }
-                    });
-                    break;
-                default:
-                    {
-                        console.log(colors.bgRed.white.bold(`Error: Unknown source type (${nextImg.source_type})!\n`));
-                        console.log('nextImage=');
-                        console.dir(nextImg, { colors: true });
-                        process.exit(1);
-                    }
-                    break;
-            }
+        if (/amv.de/i.test(origin)) {
+            let es = new TextExtractAMV_1.TextExtractAMV("");
+            let json = es.extractFromHtmlBody(url_data.url, html_body, true, true, true);
+            this._extractImages(json, this.downloadImages_list);
+            console.log(`${new Debug_1.Debug().shortInfo()} :: ${"DEBUG HALT".bold}`.bgRed.white);
+            process.exit(1);
         }
         else {
-            if (typeof (this.downloadImages_callback) != 'undefined' && this.downloadImages_callback != null) {
-                this.downloadImages_callback();
-            }
-        }
-    }
-    _css_getImageSources(source_url, source_type, body, origin, target_path, __tmp_dirName, callback) {
-        const regex = /((https?:\/\/|\/)[^\s\'\"\)]+\.(png|jpg|gif))/gm;
-        let m;
-        let _this = this;
-        this.downloadCssImage_list = [];
-        while ((m = regex.exec(body)) !== null) {
-            if (m.index === regex.lastIndex) {
-                regex.lastIndex++;
-            }
-            if (m[0].match(/(\/\*|\/\/)/i) == null) {
-                this.downloadCssImage_list.push(new ImageDownloadData(ImageDownloadDataSourceType.css, null, source_url, source_type, m[1], null, origin, target_path, 'css', __tmp_dirName));
-            }
-        }
-        if (this.downloadCssImage_list.length > 0) {
-            this.downloadCssImage_enum_idx = 0;
-            this.downloadCssImage_callback = callback;
-            this._download_next_css_image();
-        }
-        else {
-            if (typeof (callback) != 'undefined' && callback != null) {
-                callback();
-            }
-        }
-    }
-    _download_next_css_image() {
-        if (this.downloadCssImage_enum_idx < this.downloadCssImage_list.length) {
-            let _this = this;
-            let nextImg = this.downloadCssImage_list[this.downloadCssImage_enum_idx];
-            this.downloadCssImage_enum_idx += 1;
-            this._copyImage(nextImg.source_url, nextImg.source_type_str, nextImg.raw_image_url, nextImg.image_name_ext, nextImg.origin, nextImg.target_path, nextImg.target_path_subdir, nextImg.tmp_dirName, function () {
-                _this._download_next_css_image();
-            });
-        }
-        else {
-            if (typeof (this.downloadCssImage_callback) != 'undefined' && this.downloadCssImage_callback != null) {
-                this.downloadCssImage_callback();
-            }
+            console.log(`${new Debug_1.Debug().shortInfo()} :: Error: UNKNOWN host ${origin.bold}!`.red);
+            process.exit(1);
         }
     }
     _createSourceURLFile(target_path, url) {
@@ -299,45 +175,13 @@ class ImageSpider {
         }
         s2f.stringToFile(fpath, contents, true);
     }
-    _copyImage(source_url, source_type, raw_image_url, image_name_ext, origin, target_path, target_path_subdir, __tmp_dirName, callback) {
-        let _this = this;
-        let imageURL = this._checkAndFormatLocalURL(raw_image_url, origin);
-        let comps = path.parse(imageURL);
-        let image_fname = decodeURIComponent(comps.base);
-        if (typeof (image_name_ext) != 'undefined' && image_name_ext != null) {
-            let comps_fname = path.parse(image_fname);
-            image_fname = comps_fname.name + '---' + image_name_ext + comps_fname.ext;
+    _extractImages(json_array, result) {
+        for (let each of json_array) {
+            let img_array = each.getImages();
+            console.log(each.constructor.name, img_array.length);
+            result = result.concat(img_array);
         }
-        let full_targetPath = (typeof (target_path_subdir) != 'undefined' && target_path_subdir != null && target_path_subdir.trim().length > 0
-            ? path.join(target_path, target_path_subdir)
-            : target_path);
-        if (fs.existsSync(full_targetPath) == false) {
-            fse.ensureDirSync(full_targetPath);
-        }
-        let image_targetPath = path.join(full_targetPath, image_fname);
-        if (this.image_dictionary[image_targetPath] != null) {
-            if (typeof (callback) != 'undefined' && callback != null) {
-                callback();
-            }
-            return;
-        }
-        this.image_dictionary[image_targetPath] = 1;
-        needle.get(imageURL, { output: image_targetPath }, function (err, resp, body) {
-            console.log(`-------- source${colors.yellow(source_type)} =`, colors.grey(imageURL));
-            if (!err) {
-                let addSubDir = (typeof (target_path_subdir) != 'undefined' && target_path_subdir != null && target_path_subdir.trim().length > 0
-                    ? path.sep + target_path_subdir
-                    : '');
-                console.log(`         target${colors.yellow(source_type)} = ${colors.green(_this.target_path + path.sep)}${colors.green.bold(__tmp_dirName)}${colors.cyan(addSubDir)}${colors.green(path.sep + image_fname)}`);
-            }
-            else {
-                console.log(colors.bgRed.white('############################## Error'));
-                console.log(err);
-            }
-            if (typeof (callback) != 'undefined' && callback != null) {
-                callback();
-            }
-        });
+        console.dir(result, { colors: true });
     }
 }
 exports.ImageSpider = ImageSpider;

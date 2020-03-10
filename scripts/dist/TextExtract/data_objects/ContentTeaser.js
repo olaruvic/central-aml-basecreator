@@ -20,6 +20,22 @@ class ContentTeaser extends ContentAbstract_1.ContentAbstract {
         result._parse(url, $, tag);
         return result;
     }
+    getImages() {
+        let result = [];
+        if (typeof (this.header) != 'undefined' && this.header != null) {
+            result.push(this.header.getImages());
+        }
+        if (typeof (this.text) != 'undefined' && this.text != null) {
+            result.push(this.text.getImages());
+        }
+        if (typeof (this.image) != 'undefined' && this.image != null) {
+            result.push(this.image.getImages());
+        }
+        if (typeof (this.button) != 'undefined' && this.button != null) {
+            result.push(this.button.getImages());
+        }
+        return result;
+    }
     _parse(url, $, tag) {
         for (let each_tag of tag.children) {
             const cls = $(each_tag).prop('class');

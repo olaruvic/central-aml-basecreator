@@ -7,6 +7,9 @@ class ContentTitle_amv extends ContentAbstract_1.ContentAbstract {
         super(ContentAbstract_1.ContentType.title_amv);
         this.text = text.trim();
     }
+    getImages() {
+        return [];
+    }
     static init($, tag) {
         return new ContentTitle_amv($(tag).text());
     }

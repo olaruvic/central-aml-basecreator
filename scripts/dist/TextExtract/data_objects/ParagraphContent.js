@@ -25,6 +25,15 @@ class ParagraphContent {
         this.type_primitive = type;
         this.isPrimitive = true;
     }
+    getImages() {
+        let result = [];
+        if (typeof (this.img_src) != 'undefined' && this.img_src != null) {
+            for (let each of this.img_src) {
+                result.push(new ContentImage_1.ContentImage(this.img_src));
+            }
+        }
+        return result;
+    }
     static initText($, tag) {
         let res = new ParagraphContent(ParagraphContentPrimitiveType.text);
         res.text = $(tag).text().trim();

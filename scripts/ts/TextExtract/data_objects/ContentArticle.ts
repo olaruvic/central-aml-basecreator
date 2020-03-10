@@ -10,6 +10,7 @@ import { ContentArticleDataTable } from './ContentArticleDataTable';
 import { ContentArticleDataPriceCatcher } from './ContentArticleDataPriceCatcher';
 import { ContentArticleDataTitleHx } from './ContentArticleDataTitleHx';
 import { ContentArticleDataDownloadLink } from './ContentArticleDataDownloadLink';
+import { ContentImage } from './ContentImage';
 
 export class ContentArticle extends ContentAbstract
 {
@@ -19,6 +20,16 @@ export class ContentArticle extends ContentAbstract
 	{
 		super(ContentType.article)
 		this.data = []
+	}
+
+	getImages(): Array<ContentImage>
+	{
+		let result = []
+		for (let each of this.data)
+		{
+			result = result.concat( each.getImages() )
+		}
+		return result
 	}
 
 	static init(currentUrl: string, $: any, tag: any): ContentArticle

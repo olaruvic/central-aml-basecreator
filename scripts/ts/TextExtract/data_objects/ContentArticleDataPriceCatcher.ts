@@ -3,6 +3,7 @@ import { Debug } from '../../Debug/Debug';
 import { ContentArticleDataAbstract, ArticleContentType } from './ContentArticleDataAbstract';
 import { ParagraphContent } from './ParagraphContent';
 import { ContentArticle } from './ContentArticle';
+import { ContentImage } from './ContentImage';
 
 export class ContentArticleDataPriceCatcher extends ContentArticleDataAbstract
 {
@@ -16,6 +17,16 @@ export class ContentArticleDataPriceCatcher extends ContentArticleDataAbstract
 		this.text = null
 		this.price = null
 		this.tooltip = null
+	}
+
+	getImages(): Array<ContentImage>
+	{
+		let result = []
+		if ( typeof(this.tooltip)!='undefined' && this.tooltip!=null )
+		{
+			result.push( this.tooltip.getImages() )
+		}
+		return result
 	}
 
 	static init(currentUrl: string, $: any, tag: any): ContentArticleDataPriceCatcher

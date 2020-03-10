@@ -15,5 +15,13 @@ es.extractFromUrl(
 	'https://www.central.de/produkte/',															// verteiler
 	true,
 	true,
-	true
+	true,
+	(json) => {
+		// console.log(`${new Debug().shortInfo()} :: ${"DEBUG HALT".bold}`.bgRed.white);
+		// process.exit(1);
+		console.log("------------------------------------------------");
+		console.dir(json, {colors: true, depth: 100})
+		console.log("------------------------------------------------");
+		console.log(JSON.stringify(json))
+	}
 )

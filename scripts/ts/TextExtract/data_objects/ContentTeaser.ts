@@ -3,6 +3,7 @@ import { Debug } from '../../Debug/Debug';
 import { ContentAbstract, ContentType } from './ContentAbstract';
 import { ContentArticle } from './ContentArticle';
 import { ParagraphContent } from './ParagraphContent';
+import { ContentImage } from './ContentImage';
 
 export class ContentTeaser extends ContentAbstract
 {
@@ -27,6 +28,28 @@ export class ContentTeaser extends ContentAbstract
 		const tagObj = $(tag);
 		let result = new ContentTeaser(tagObj.prop('class'))
 			result._parse(url, $, tag)
+		return result
+	}
+
+	getImages(): Array<ContentImage>
+	{
+		let result = []
+		if ( typeof(this.header)!='undefined' && this.header!=null )
+		{
+			result.push( this.header.getImages() )
+		}
+		if ( typeof(this.text)!='undefined' && this.text!=null )
+		{
+			result.push( this.text.getImages() )
+		}
+		if ( typeof(this.image)!='undefined' && this.image!=null )
+		{
+			result.push( this.image.getImages() )
+		}
+		if ( typeof(this.button)!='undefined' && this.button!=null )
+		{
+			result.push( this.button.getImages() )
+		}
 		return result
 	}
 

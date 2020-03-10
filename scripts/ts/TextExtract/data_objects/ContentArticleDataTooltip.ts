@@ -3,6 +3,7 @@ import { Debug } from '../../Debug/Debug';
 const colors = require('colors');
 import { ContentArticleDataAbstract, ArticleContentType } from './ContentArticleDataAbstract';
 import { ContentArticle } from './ContentArticle';
+import { ContentImage } from './ContentImage';
 
 export class ContentArticleDataTooltip extends ContentArticleDataAbstract
 {
@@ -15,6 +16,16 @@ export class ContentArticleDataTooltip extends ContentArticleDataAbstract
 		//
 		this.tooltip_id = null;
 		this.tooltip = null;
+	}
+
+	getImages(): Array<ContentImage>
+	{
+		let result = []
+		if ( typeof(this.tooltip)!='undefined' && this.tooltip!=null )
+		{
+			result.push( this.tooltip.getImages() )
+		}
+		return result
 	}
 
 	static init_amv(currentUrl: string, $: any, tag: any): ContentArticleDataAbstract

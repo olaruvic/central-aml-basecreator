@@ -5,6 +5,7 @@ import { ParagraphContent } from './ParagraphContent';
 import { ContentArticleDataUnorderedList } from './ContentArticleDataUnorderedList';
 import { ContentArticleDataOrderedList } from './ContentArticleDataOrderedList';
 import { ContentArticleDataTooltip } from './ContentArticleDataTooltip';
+import { ContentImage } from './ContentImage';
 
 export enum ParagraphContentType {
 	text = 'text',
@@ -28,6 +29,16 @@ export class ContentArticleDataParagraph extends ContentArticleDataAbstract
 		//
 		this.paragraphType = paragraphContentType;
 		this._initParagraphType()
+	}
+
+	getImages(): Array<ContentImage>
+	{
+		let result = []
+		for (let each of this.textComponents)
+		{
+			result = result.concat( each.getImages() )
+		}
+		return result
 	}
 
 	private _initParagraphType()
@@ -75,6 +86,13 @@ export class ContentArticleDataParagraph extends ContentArticleDataAbstract
 				case 'tag':
 					switch ( each.name )
 					{
+						case 'p':
+							{
+								let p = ContentArticleDataParagraph.init(currentUrl, $, each, false);
+								this.textComponents = this.textComponents.concat( p );
+							}
+							break;
+
 						case 'strong':
 							this.textComponents.push( ParagraphContent.initStrongText($, each) )
 							break;

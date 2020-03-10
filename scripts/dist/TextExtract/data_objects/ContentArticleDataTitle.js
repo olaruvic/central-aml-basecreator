@@ -12,5 +12,8 @@ class ContentArticleDataTitle extends ContentArticleDataAbstract_1.ContentArticl
         const o = $(tag);
         return new ContentArticleDataTitle(o.text(), o.prop('class'));
     }
+    getImages() {
+        return [];
+    }
 }
 exports.ContentArticleDataTitle = ContentArticleDataTitle;

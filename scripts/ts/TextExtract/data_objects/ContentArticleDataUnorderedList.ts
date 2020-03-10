@@ -2,6 +2,7 @@ const colors = require('colors');
 import { Debug } from './../../Debug/Debug';
 import { ContentArticleDataAbstract, ArticleContentType } from './ContentArticleDataAbstract';
 import { ContentArticleDataParagraph } from './ContentArticleDataParagraph';
+import { ContentImage } from './ContentImage';
 
 export enum ParagraphContentType {
 	text = 'text',
@@ -17,6 +18,16 @@ export class ContentArticleDataUnorderedList extends ContentArticleDataAbstract
 	{
 		super(ArticleContentType.ul)
 		this.listItems = []
+	}
+
+	getImages(): Array<ContentImage>
+	{
+		let result = []
+		for (let each of this.listItems)
+		{
+			result = result.concat( each.getImages() )
+		}
+		return result
 	}
 
 /*	static init(currentUrl: string, $: any, tag: any): ContentArticleDataUnorderedList

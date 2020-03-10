@@ -4,6 +4,7 @@ import { ContentAbstract, ContentType } from './ContentAbstract';
 import { ContentArticle } from './ContentArticle';
 import { ParagraphContent } from './ParagraphContent';
 import { ContentTab } from './ContentTab';
+import { ContentImage } from './ContentImage';
 
 export class ContentTabGroup extends ContentAbstract
 {
@@ -19,6 +20,16 @@ export class ContentTabGroup extends ContentAbstract
 	{
 		let result = new ContentTabGroup()
 			result._parse(url, $, tag)
+		return result
+	}
+
+	getImages(): Array<ContentImage>
+	{
+		let result = []
+		for (let each of this.tabs)
+		{
+			result = result.concat( each.getImages() )
+		}
 		return result
 	}
 

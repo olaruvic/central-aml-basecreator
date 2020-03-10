@@ -1,5 +1,6 @@
 const colors = require('colors');
 import { ContentArticleDataAbstract, ArticleContentType } from './ContentArticleDataAbstract';
+import { ContentImage } from './ContentImage';
 
 export class ContentArticleDataTitle extends ContentArticleDataAbstract
 {
@@ -17,5 +18,10 @@ export class ContentArticleDataTitle extends ContentArticleDataAbstract
 	{
 		const o = $(tag)
 		return new ContentArticleDataTitle(o.text(), o.prop('class'))
+	}
+
+	getImages(): Array<ContentImage>
+	{
+		return []
 	}
 }

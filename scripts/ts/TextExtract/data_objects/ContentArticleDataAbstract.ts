@@ -1,5 +1,7 @@
 const colors = require('colors');
+import { Debug } from '../../Debug/Debug';
 import { ContentAbstract, ContentType } from './ContentAbstract';
+import { ContentImage } from './ContentImage';
 
 export enum ArticleContentType {
 	title = "title",
@@ -24,5 +26,12 @@ export class ContentArticleDataAbstract
 	{
 		this.type = type
 		this.isPrimitive = false		// true := ParagraphContent, false := ContentArticleDataAbstract
+	}
+
+	getImages(): Array<ContentImage>
+	{
+		console.log(`Error (${new Debug().shortInfo()}): Superclass responsibility!`.red.white.bold)
+		process.exit(1)
+		return []
 	}
 }

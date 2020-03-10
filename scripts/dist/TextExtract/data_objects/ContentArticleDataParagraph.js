@@ -22,6 +22,13 @@ class ContentArticleDataParagraph extends ContentArticleDataAbstract_1.ContentAr
         this.paragraphType = paragraphContentType;
         this._initParagraphType();
     }
+    getImages() {
+        let result = [];
+        for (let each of this.textComponents) {
+            result = result.concat(each.getImages());
+        }
+        return result;
+    }
     _initParagraphType() {
         if (typeof (this.paragraphType) != 'undefined' && this.paragraphType != null) {
             return;
@@ -53,6 +60,12 @@ class ContentArticleDataParagraph extends ContentArticleDataAbstract_1.ContentAr
                     break;
                 case 'tag':
                     switch (each.name) {
+                        case 'p':
+                            {
+                                let p = ContentArticleDataParagraph.init(currentUrl, $, each, false);
+                                this.textComponents = this.textComponents.concat(p);
+                            }
+                            break;
                         case 'strong':
                             this.textComponents.push(ParagraphContent_1.ParagraphContent.initStrongText($, each));
                             break;

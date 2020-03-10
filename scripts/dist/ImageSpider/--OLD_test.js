@@ -1,0 +1,11 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const path = require("path");
+const root = require("../../../root");
+require("../String-extensions");
+const ImageSpider_1 = require("./ImageSpider");
+const json_data = require(path.join(root(), "central-amv-data", "juli2020.json"));
+let target_path = '/Users/victorolaru/Desktop/test_images';
+let leanup_images = false;
+let imgSpider = new ImageSpider_1.ImageSpider(target_path, json_data, leanup_images);
+imgSpider.run();

@@ -24,6 +24,11 @@ export class ContentImage extends ContentAbstract
 		}
 	}
 
+	getImages(): Array<ContentImage>
+	{
+		return [this];
+	}
+
 	static init(currentUrl: string, $: any, tag: any): ContentImage
 	{
 		let tagObj = $(tag)

@@ -14,6 +14,13 @@ class ContentArticleDataOrderedList extends ContentArticleDataAbstract_1.Content
         super(ContentArticleDataAbstract_1.ArticleContentType.ol);
         this.listItems = [];
     }
+    getImages() {
+        let result = [];
+        for (let each of this.listItems) {
+            result = result.concat(each.getImages());
+        }
+        return result;
+    }
     static init(url, $, tag) {
         let result = new ContentArticleDataOrderedList();
         for (let each_tag of tag.children) {

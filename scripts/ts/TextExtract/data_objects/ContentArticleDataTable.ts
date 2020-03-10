@@ -2,15 +2,29 @@ const colors = require('colors');
 import { Debug } from './../../Debug/Debug';
 import { ContentArticleDataAbstract, ArticleContentType } from './ContentArticleDataAbstract';
 import { ContentArticleDataParagraph } from './ContentArticleDataParagraph';
+import { ContentImage } from './ContentImage';
 
 export class ContentArticleDataTable extends ContentArticleDataAbstract
 {
-	rows: Array<Array<string>>
+	rows: Array<Array<ContentArticleDataParagraph>>
 
 	constructor()
 	{
 		super(ArticleContentType.table)
 		this.rows = []
+	}
+
+	getImages(): Array<ContentImage>
+	{
+		let result = []
+		for (let each_row of this.rows)
+		{
+			for(let each_col of each_row)
+			{
+				result = result.concat( each_col.getImages() )
+			}
+		}
+		return result
 	}
 
 /*	static init($: any, tag: any): ContentArticleDataTable

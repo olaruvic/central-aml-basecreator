@@ -9,6 +9,15 @@ class ContentArticleDataTable extends ContentArticleDataAbstract_1.ContentArticl
         super(ContentArticleDataAbstract_1.ArticleContentType.table);
         this.rows = [];
     }
+    getImages() {
+        let result = [];
+        for (let each_row of this.rows) {
+            for (let each_col of each_row) {
+                result = result.concat(each_col.getImages());
+            }
+        }
+        return result;
+    }
     static init(url, $, tag) {
         let table = new ContentArticleDataTable();
         table._parse(url, $, tag);

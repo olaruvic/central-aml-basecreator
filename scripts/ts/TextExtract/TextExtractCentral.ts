@@ -54,7 +54,7 @@ export class TextExtractCentral
 	}
 
 	//##########################################################################################
-	extractFromUrl(
+/*	extractFromUrl(
 		starting_url: string, 
 		// searchText_regexStr: string, 
 		// ignoreUrlsRegEx: string, 
@@ -73,6 +73,52 @@ export class TextExtractCentral
 		this._sitemap_links_pool = links
 		//
 		this._exec_webExtract(log_ifFound, log_ifNotFound, log_error, callback)
+	}
+	*/
+	extractFromUrl(
+		url: string, 
+		log_ifFound: boolean,
+		log_ifNotFound: boolean,
+		log_error: boolean,
+		callback?: (json)=>void
+		)
+	{
+		this._log_ifFound = log_ifFound
+		this._log_ifNotFound = log_ifNotFound
+		this._log_error = log_error
+		//
+		let _this = this;
+		needle.get(url, function(err: any, res: any, body: any) {
+			if ( !err ) 
+			{  
+				const current_url = _this._normalizeUrl(url as string)
+				_this._extractText(current_url, body as string, callback)
+			}
+			else
+			{
+				if ( _this._log_error == true )
+				{
+					console.log(colors.bgRed.white('############ error'))
+					console.dir(err, {colors: true, depth: 10})
+				}
+			}
+		})
+	}
+
+	extractFromHtmlBody(
+		url: string,
+		html_body: string, 
+		log_ifFound: boolean,
+		log_ifNotFound: boolean,
+		log_error: boolean
+		): any
+	{
+		this._log_ifFound = log_ifFound
+		this._log_ifNotFound = log_ifNotFound
+		this._log_error = log_error
+		//
+		const current_url = this._normalizeUrl(url as string)
+		return this._extractText(current_url, html_body)
 	}
 
 	private _exec_webExtract(
@@ -173,24 +219,25 @@ process.exit(1);
 		return res
 	}
 
-	private _extractText(url: string, html_body: string, callback: ()=>void)
+	private _extractText(url: string, html_body: string, callback?: (json)=>void): Array<any>
 	{
 		const $ = cheerio.load(html_body)
 		//
 		let result = [];
 		this._parse_defaultContent_sections( url, $, $('article'), result );		// normaler Inhalt enthalten in <div class="content default">...<article class="...">...</article>...</div>
 		this._parse_homeContent_sections( url, $, $('.content.home'), result);		// Verteiler enthalten in <div class="content home">...</div>
-// console.log(`${new Debug().shortInfo()} :: ${"DEBUG HALT".bold}`.bgRed.white);
-// process.exit(1);
-console.log("------------------------------------------------");
-console.dir(result, {colors: true, depth: 100})
-console.log("------------------------------------------------");
-console.log(JSON.stringify(result))
+
+		if ( callback )
+		{
+			callback(result);
+		}
 
 /*		let articles = $('section .am-rt');
 		articles.each(function(i, elem) {
 			console.log(`++ [${$(this)}]\n`)
 		});*/
+
+		return result;
 	}
 
 	private _parse_defaultContent_sections(url: string, $: any, sections: any, result: Array<any>)

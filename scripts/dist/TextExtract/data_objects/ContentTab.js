@@ -9,5 +9,15 @@ class ContentTab extends ContentAbstract_1.ContentAbstract {
         this.title = title;
         this.content = content;
     }
+    getImages() {
+        let result = [];
+        if (typeof (this.title) != 'undefined' && this.title != null) {
+            result.push(this.title.getImages());
+        }
+        for (let each of this.content) {
+            result = result.concat(each.getImages());
+        }
+        return result;
+    }
 }
 exports.ContentTab = ContentTab;

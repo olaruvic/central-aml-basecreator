@@ -14,6 +14,13 @@ class ContentArticleDataUnorderedList extends ContentArticleDataAbstract_1.Conte
         super(ContentArticleDataAbstract_1.ArticleContentType.ul);
         this.listItems = [];
     }
+    getImages() {
+        let result = [];
+        for (let each of this.listItems) {
+            result = result.concat(each.getImages());
+        }
+        return result;
+    }
     static init(url, $, tag) {
         let result = new ContentArticleDataUnorderedList();
         for (let each_tag of tag.children) {

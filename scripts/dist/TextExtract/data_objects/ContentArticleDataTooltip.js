@@ -10,6 +10,13 @@ class ContentArticleDataTooltip extends ContentArticleDataAbstract_1.ContentArti
         this.tooltip_id = null;
         this.tooltip = null;
     }
+    getImages() {
+        let result = [];
+        if (typeof (this.tooltip) != 'undefined' && this.tooltip != null) {
+            result.push(this.tooltip.getImages());
+        }
+        return result;
+    }
     static init_amv(currentUrl, $, tag) {
         let result = new ContentArticleDataTooltip();
         result._parse_amv(currentUrl, $, tag);

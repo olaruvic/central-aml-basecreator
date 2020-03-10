@@ -2,6 +2,7 @@ const colors = require('colors');
 import { Debug } from '../../Debug/Debug';
 import { ContentArticleDataAbstract, ArticleContentType } from './ContentArticleDataAbstract';
 import { ParagraphContent } from './ParagraphContent';
+import { ContentImage } from './ContentImage';
 
 
 export class ContentArticleDataDownloadLink extends ContentArticleDataAbstract
@@ -12,6 +13,16 @@ export class ContentArticleDataDownloadLink extends ContentArticleDataAbstract
 	constructor()
 	{
 		super(ArticleContentType.download_link)
+	}
+
+	getImages(): Array<ContentImage>
+	{
+		let result = []
+		if ( typeof(this.text)!='undefined' && this.text!=null )
+		{
+			result.push( this.text.getImages() )
+		}
+		return result
 	}
 
 	static init(url: string, $: any, tag: any): ContentArticleDataDownloadLink

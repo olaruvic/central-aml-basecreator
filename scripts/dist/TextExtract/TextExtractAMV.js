@@ -29,12 +29,30 @@ class TextExtractAMV {
             process.exit(1);
         }
     }
-    extractFromUrl(starting_url, log_ifFound, log_ifNotFound, log_error, callback) {
-        let links = {};
-        links[starting_url.trim().toLowerCase()] = 1;
-        this._sitemap_links = Object.keys(links);
-        this._sitemap_links_pool = links;
-        this._exec_webExtract(log_ifFound, log_ifNotFound, log_error, callback);
+    extractFromUrl(url, log_ifFound, log_ifNotFound, log_error, callback) {
+        this._log_ifFound = log_ifFound;
+        this._log_ifNotFound = log_ifNotFound;
+        this._log_error = log_error;
+        let _this = this;
+        needle.get(url, function (err, res, body) {
+            if (!err) {
+                const current_url = _this._normalizeUrl(url);
+                _this._extractText(current_url, body, callback);
+            }
+            else {
+                if (_this._log_error == true) {
+                    console.log(colors.bgRed.white('############ error'));
+                    console.dir(err, { colors: true, depth: 10 });
+                }
+            }
+        });
+    }
+    extractFromHtmlBody(url, html_body, log_ifFound, log_ifNotFound, log_error) {
+        this._log_ifFound = log_ifFound;
+        this._log_ifNotFound = log_ifNotFound;
+        this._log_error = log_error;
+        const current_url = this._normalizeUrl(url);
+        return this._extractText(current_url, html_body);
     }
     _exec_webExtract(log_ifFound, log_ifNotFound, log_error, callback) {
         this._404_notFound = 0;
@@ -98,10 +116,10 @@ class TextExtractAMV {
         let result = [];
         this._parse_head_image(url, $, $('#am-pagevisual'), result);
         this._parse_sections(url, $, $('.ym-col1 .ym-cbox'), result);
-        console.log("------------------------------------------------");
-        console.dir(result, { colors: true, depth: 100 });
-        console.log("------------------------------------------------");
-        console.log(JSON.stringify(result));
+        if (callback) {
+            callback(result);
+        }
+        return result;
     }
     _parse_head_image(url, $, head_image_section, result) {
         for (let idx = 0; idx < head_image_section.length; idx++) {

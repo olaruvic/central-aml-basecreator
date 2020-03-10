@@ -1,4 +1,6 @@
 const colors = require('colors');
+import { Debug } from "../../Debug/Debug";
+import { ContentImage } from "./ContentImage";
 
 export enum ContentType {
 	title_amv = "title.amv",
@@ -19,5 +21,12 @@ export class ContentAbstract
 	constructor(type: ContentType) 
 	{
 		this.type = type
+	}
+
+	getImages(): Array<ContentImage>
+	{
+		console.log(`Error (${new Debug().shortInfo()}): Superclass responsibility!`)
+		process.exit(1)
+		return []
 	}
 }

@@ -8,6 +8,9 @@ class ContentArticleDataTitleHx extends ContentArticleDataAbstract_1.ContentArti
         this.text = text.trim();
         this.className = className;
     }
+    getImages() {
+        return [];
+    }
     static init_h2($, tag) {
         const o = $(tag);
         return new ContentArticleDataTitleHx(ContentArticleDataAbstract_1.ArticleContentType.title_h2, o.text(), o.prop('class'));

@@ -11,6 +11,13 @@ class ContentArticleDataPriceCatcher extends ContentArticleDataAbstract_1.Conten
         this.price = null;
         this.tooltip = null;
     }
+    getImages() {
+        let result = [];
+        if (typeof (this.tooltip) != 'undefined' && this.tooltip != null) {
+            result.push(this.tooltip.getImages());
+        }
+        return result;
+    }
     static init(currentUrl, $, tag) {
         let priceCatcher = new ContentArticleDataPriceCatcher();
         for (let each of tag.children) {

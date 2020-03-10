@@ -3,6 +3,7 @@ import { Debug } from '../../Debug/Debug';
 const colors = require('colors');
 import { ContentAbstract, ContentType } from './ContentAbstract';
 import { ContentTitle_amv } from './ContentTitle_amv';
+import { ContentImage } from './ContentImage';
 
 export class ContentTitle_central extends ContentTitle_amv
 {
@@ -14,6 +15,11 @@ export class ContentTitle_central extends ContentTitle_amv
 		this.type = ContentType.title_central;
 		this.text = text.trim()
 		this.subtitle = subtitle.trim()
+	}
+
+	getImages(): Array<ContentImage>
+	{
+		return [];
 	}
 
 	static init_central(url: string, $: any, tag: any): ContentTitle_central

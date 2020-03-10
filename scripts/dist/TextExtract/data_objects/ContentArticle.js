@@ -16,6 +16,13 @@ class ContentArticle extends ContentAbstract_1.ContentAbstract {
         super(ContentAbstract_1.ContentType.article);
         this.data = [];
     }
+    getImages() {
+        let result = [];
+        for (let each of this.data) {
+            result = result.concat(each.getImages());
+        }
+        return result;
+    }
     static init(currentUrl, $, tag) {
         let article = new ContentArticle();
         for (let each of tag.children) {

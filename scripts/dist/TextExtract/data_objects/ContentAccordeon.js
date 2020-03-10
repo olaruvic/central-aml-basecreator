@@ -8,5 +8,12 @@ class ContentAccordeon extends ContentAbstract_1.ContentAbstract {
         this.title = title;
         this.articles = articles;
     }
+    getImages() {
+        let result = [];
+        for (let each of this.articles) {
+            result = result.concat(each.getImages());
+        }
+        return result;
+    }
 }
 exports.ContentAccordeon = ContentAccordeon;
