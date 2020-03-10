@@ -94,8 +94,6 @@ class TextExtractCentral {
         let result = [];
         this._parse_defaultContent_sections(url, $, $('article'), result);
         this._parse_homeContent_sections(url, $, $('.content.home'), result);
-        console.log(`${new Debug_1.Debug().shortInfo()} :: ${"DEBUG HALT".bold}`.bgRed.white);
-        process.exit(1);
         console.log("------------------------------------------------");
         console.dir(result, { colors: true, depth: 100 });
         console.log("------------------------------------------------");

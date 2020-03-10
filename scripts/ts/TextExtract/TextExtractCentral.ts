@@ -180,8 +180,8 @@ process.exit(1);
 		let result = [];
 		this._parse_defaultContent_sections( url, $, $('article'), result );		// normaler Inhalt enthalten in <div class="content default">...<article class="...">...</article>...</div>
 		this._parse_homeContent_sections( url, $, $('.content.home'), result);		// Verteiler enthalten in <div class="content home">...</div>
-console.log(`${new Debug().shortInfo()} :: ${"DEBUG HALT".bold}`.bgRed.white);
-process.exit(1);
+// console.log(`${new Debug().shortInfo()} :: ${"DEBUG HALT".bold}`.bgRed.white);
+// process.exit(1);
 console.log("------------------------------------------------");
 console.dir(result, {colors: true, depth: 100})
 console.log("------------------------------------------------");
