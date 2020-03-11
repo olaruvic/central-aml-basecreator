@@ -5,19 +5,19 @@ const Debug_1 = require("../../Debug/Debug");
 const ContentAbstract_1 = require("./ContentAbstract");
 const ContentArticle_1 = require("./ContentArticle");
 const ParagraphContent_1 = require("./ParagraphContent");
-class ContentTeaser extends ContentAbstract_1.ContentAbstract {
+class ContentTeaser_central extends ContentAbstract_1.ContentAbstract {
     constructor(className) {
-        super(ContentAbstract_1.ContentType.teaser);
+        super(ContentAbstract_1.ContentType.teaser_central);
         this.className = className;
         this.header = null;
         this.text = null;
         this.image = null;
         this.button = null;
     }
-    static init(url, $, tag) {
+    static init_central(url, $, tag) {
         const tagObj = $(tag);
-        let result = new ContentTeaser(tagObj.prop('class'));
-        result._parse(url, $, tag);
+        let result = new ContentTeaser_central(tagObj.prop('class'));
+        result._parse_central(url, $, tag);
         return result;
     }
     getImages() {
@@ -36,7 +36,7 @@ class ContentTeaser extends ContentAbstract_1.ContentAbstract {
         }
         return result;
     }
-    _parse(url, $, tag) {
+    _parse_central(url, $, tag) {
         for (let each_tag of tag.children) {
             const cls = $(each_tag).prop('class');
             const tagObj = $(each_tag);
@@ -192,4 +192,4 @@ class ContentTeaser extends ContentAbstract_1.ContentAbstract {
         }
     }
 }
-exports.ContentTeaser = ContentTeaser;
+exports.ContentTeaser_central = ContentTeaser_central;

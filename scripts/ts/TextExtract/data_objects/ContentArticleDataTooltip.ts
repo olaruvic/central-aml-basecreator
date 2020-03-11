@@ -23,7 +23,7 @@ export class ContentArticleDataTooltip extends ContentArticleDataAbstract
 		let result = []
 		if ( typeof(this.tooltip)!='undefined' && this.tooltip!=null )
 		{
-			result.push( this.tooltip.getImages() )
+			result = result.concat( this.tooltip.getImages() )
 		}
 		return result
 	}

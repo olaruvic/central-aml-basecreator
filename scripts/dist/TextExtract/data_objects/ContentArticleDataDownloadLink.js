@@ -13,7 +13,7 @@ class ContentArticleDataDownloadLink extends ContentArticleDataAbstract_1.Conten
     getImages() {
         let result = [];
         if (typeof (this.text) != 'undefined' && this.text != null) {
-            result.push(this.text.getImages());
+            result = result.concat(this.text.getImages());
         }
         return result;
     }

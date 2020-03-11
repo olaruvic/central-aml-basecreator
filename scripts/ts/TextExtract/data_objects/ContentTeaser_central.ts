@@ -5,7 +5,7 @@ import { ContentArticle } from './ContentArticle';
 import { ParagraphContent } from './ParagraphContent';
 import { ContentImage } from './ContentImage';
 
-export class ContentTeaser extends ContentAbstract
+export class ContentTeaser_central extends ContentAbstract
 {
 	className: string|undefined|null
 	header: ContentArticle
@@ -15,7 +15,7 @@ export class ContentTeaser extends ContentAbstract
 
 	constructor(className: string)
 	{
-		super(ContentType.teaser)
+		super(ContentType.teaser_central)
 		this.className = className
 		this.header = null
 		this.text = null
@@ -23,11 +23,11 @@ export class ContentTeaser extends ContentAbstract
 		this.button = null
 	}
 
-	static init(url: string, $: any, tag: any): ContentTeaser
+	static init_central(url: string, $: any, tag: any): ContentTeaser_central
 	{
 		const tagObj = $(tag);
-		let result = new ContentTeaser(tagObj.prop('class'))
-			result._parse(url, $, tag)
+		let result = new ContentTeaser_central(tagObj.prop('class'))
+			result._parse_central(url, $, tag)
 		return result
 	}
 
@@ -36,24 +36,24 @@ export class ContentTeaser extends ContentAbstract
 		let result = []
 		if ( typeof(this.header)!='undefined' && this.header!=null )
 		{
-			result.push( this.header.getImages() )
+			result = result.concat( this.header.getImages() )
 		}
 		if ( typeof(this.text)!='undefined' && this.text!=null )
 		{
-			result.push( this.text.getImages() )
+			result = result.concat( this.text.getImages() )
 		}
 		if ( typeof(this.image)!='undefined' && this.image!=null )
 		{
-			result.push( this.image.getImages() )
+			result = result.concat( this.image.getImages() )
 		}
 		if ( typeof(this.button)!='undefined' && this.button!=null )
 		{
-			result.push( this.button.getImages() )
+			result = result.concat( this.button.getImages() )
 		}
 		return result
 	}
 
-	private _parse(url: string, $: any, tag: any)
+	private _parse_central(url: string, $: any, tag: any)
 	{
 		// console.log(`${colors.magenta(new Debug().shortInfo())} :: type=[${tag.type}] name=[${tag.name}] class=[${$(tag).prop('class')}]`);
 		for( let each_tag of tag.children )

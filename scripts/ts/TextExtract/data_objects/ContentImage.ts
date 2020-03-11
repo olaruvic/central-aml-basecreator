@@ -142,7 +142,7 @@ export class ContentImage extends ContentAbstract
 			resImg = JSON.parse( resImg );
 			for( let each_responsive_key in resImg )
 			{
-				if ( /\d+x\d/i.test(each_responsive_key) )		// mögliche Werte: 'portrait_ratio1x1', 'landscape_ratio29x10', ...
+				if ( /\d+x\d/i.test(each_responsive_key) || /landscape_stage/i.test(each_responsive_key) )		// mögliche Werte: 'portrait_ratio1x1', 'landscape_ratio29x10', ...
 				{
 					let images = resImg[each_responsive_key];
 					for(let each_key in images)

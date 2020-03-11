@@ -9,6 +9,7 @@ var ParagraphContentPrimitiveType;
     ParagraphContentPrimitiveType["text"] = "text";
     ParagraphContentPrimitiveType["strong"] = "strong";
     ParagraphContentPrimitiveType["sup"] = "sup";
+    ParagraphContentPrimitiveType["em"] = "em";
     ParagraphContentPrimitiveType["img"] = "img";
     ParagraphContentPrimitiveType["br"] = "br";
     ParagraphContentPrimitiveType["link"] = "link";
@@ -17,7 +18,7 @@ var ParagraphContentPrimitiveType;
 class ParagraphContent {
     constructor(type) {
         this.text = null;
-        this.img_src = null;
+        this.images = null;
         this.href = null;
         this.href_absolute = null;
         this.className = null;
@@ -27,10 +28,8 @@ class ParagraphContent {
     }
     getImages() {
         let result = [];
-        if (typeof (this.img_src) != 'undefined' && this.img_src != null) {
-            for (let each of this.img_src) {
-                result.push(new ContentImage_1.ContentImage(this.img_src));
-            }
+        if (typeof (this.images) != 'undefined' && this.images != null && this.images.length > 0) {
+            result = result.concat(this.images);
         }
         return result;
     }
@@ -49,6 +48,11 @@ class ParagraphContent {
         res.text = $(tag).text().trim();
         return res;
     }
+    static initEmText($, tag) {
+        let res = new ParagraphContent(ParagraphContentPrimitiveType.em);
+        res.text = $(tag).text().trim();
+        return res;
+    }
     static initLineBreak($, tag) {
         let res = new ParagraphContent(ParagraphContentPrimitiveType.br);
         res.text = '\n';
@@ -61,9 +65,9 @@ class ParagraphContent {
         if (typeof (cls) != 'undefined' && cls != null && cls.trim().length > 0) {
             res.className = cls.trim();
         }
-        if (res.img_src == null)
-            res.img_src = [];
-        res.img_src = res.img_src.concat(tmp_img.url);
+        if (res.images == null)
+            res.images = [];
+        res.images.push(tmp_img);
         return res;
     }
     static initLink(currentUrl, $, tag) {
@@ -83,9 +87,9 @@ class ParagraphContent {
                 case 'tag':
                     if (each.name == 'img') {
                         let tmp_img = ContentImage_1.ContentImage.init(currentUrl, $, each);
-                        if (res.img_src == null)
-                            res.img_src = [];
-                        res.img_src = res.img_src.concat(tmp_img.url);
+                        if (res.images == null)
+                            res.images = [];
+                        res.images.push(tmp_img);
                     }
                     else if (each.name == 'span') {
                         let txt = $(each).text().trim();

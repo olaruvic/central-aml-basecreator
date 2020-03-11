@@ -8,6 +8,7 @@ import { ContentArticleDataTooltip } from './ContentArticleDataTooltip';
 import { ContentImage } from './ContentImage';
 
 export enum ParagraphContentType {
+	section_subtitle = "section_subtitle",
 	text = 'text',
 	footnote = 'footnote',
 	table_data = 'table_data'
@@ -48,6 +49,14 @@ export class ContentArticleDataParagraph extends ContentArticleDataAbstract
 			return;		// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< return!
 		}
 		if ( typeof(this.className)=='undefined' || this.className==null ) 
+		{
+			this.paragraphType = ParagraphContentType.text;
+		}
+		else if ( /section-subtitle/i.test(this.className) )
+		{
+			this.paragraphType = ParagraphContentType.section_subtitle;
+		}
+		else if ( /(stage-slide-description|MsoNoSpacing|MsoNormal)/.test(this.className) )
 		{
 			this.paragraphType = ParagraphContentType.text;
 		}
@@ -99,6 +108,10 @@ export class ContentArticleDataParagraph extends ContentArticleDataAbstract
 						
 						case 'sup':
 							this.textComponents.push( ParagraphContent.initSupText($, each) )
+							break;
+						
+						case 'em':
+							this.textComponents.push( ParagraphContent.initEmText($, each) )
 							break;
 						
 						case 'br':

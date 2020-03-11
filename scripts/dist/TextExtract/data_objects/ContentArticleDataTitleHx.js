@@ -11,6 +11,10 @@ class ContentArticleDataTitleHx extends ContentArticleDataAbstract_1.ContentArti
     getImages() {
         return [];
     }
+    static init_h1($, tag) {
+        const o = $(tag);
+        return new ContentArticleDataTitleHx(ContentArticleDataAbstract_1.ArticleContentType.title_h1, o.text(), o.prop('class'));
+    }
     static init_h2($, tag) {
         const o = $(tag);
         return new ContentArticleDataTitleHx(ContentArticleDataAbstract_1.ArticleContentType.title_h2, o.text(), o.prop('class'));
@@ -22,6 +26,10 @@ class ContentArticleDataTitleHx extends ContentArticleDataAbstract_1.ContentArti
     static init_h4($, tag) {
         const o = $(tag);
         return new ContentArticleDataTitleHx(ContentArticleDataAbstract_1.ArticleContentType.title_h4, o.text(), o.prop('class'));
+    }
+    static init_h5($, tag) {
+        const o = $(tag);
+        return new ContentArticleDataTitleHx(ContentArticleDataAbstract_1.ArticleContentType.title_h5, o.text(), o.prop('class'));
     }
 }
 exports.ContentArticleDataTitleHx = ContentArticleDataTitleHx;

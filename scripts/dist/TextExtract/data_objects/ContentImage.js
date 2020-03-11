@@ -101,7 +101,7 @@ class ContentImage extends ContentAbstract_1.ContentAbstract {
         if (typeof (resImg) != 'undefined' && resImg != null) {
             resImg = JSON.parse(resImg);
             for (let each_responsive_key in resImg) {
-                if (/\d+x\d/i.test(each_responsive_key)) {
+                if (/\d+x\d/i.test(each_responsive_key) || /landscape_stage/i.test(each_responsive_key)) {
                     let images = resImg[each_responsive_key];
                     for (let each_key in images) {
                         let each_src = images[each_key].trim();

@@ -69,6 +69,9 @@ class ContentArticle extends ContentAbstract_1.ContentAbstract {
                         console.log(`${colors.magenta(new Debug_1.Debug().shortInfo())} :: ${colors.red("Unknown DIV TAG")} :: type=[${each.type}] name=[${each.name}] class=[${cls}]`);
                     }
                     break;
+                case 'h1':
+                    article.data.push(ContentArticleDataTitleHx_1.ContentArticleDataTitleHx.init_h1($, each));
+                    break;
                 case 'h2':
                     article.data.push(ContentArticleDataTitleHx_1.ContentArticleDataTitleHx.init_h2($, each));
                     break;
@@ -77,6 +80,9 @@ class ContentArticle extends ContentAbstract_1.ContentAbstract {
                     break;
                 case 'h4':
                     article.data.push(ContentArticleDataTitleHx_1.ContentArticleDataTitleHx.init_h4($, each));
+                    break;
+                case 'h5':
+                    article.data.push(ContentArticleDataTitleHx_1.ContentArticleDataTitleHx.init_h5($, each));
                     break;
                 default:
                     console.log(`${colors.magenta(new Debug_1.Debug().shortInfo())} :: ${colors.red("Unknown")} :: type=[${each.type}] name=[${each.name}] class=[${cls}]`);

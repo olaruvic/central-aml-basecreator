@@ -24,7 +24,7 @@ export class ContentTab extends ContentAbstract
 		let result = []
 		if ( typeof(this.title)!='undefined' && this.title!=null )
 		{
-			result.push( this.title.getImages() )
+			result = result.concat( this.title.getImages() )
 		}
 		for (let each of this.content)
 		{

@@ -4,7 +4,7 @@
     "menu": false,
     "tracking":"",
     "vanity":"",
-    "notes":"In die Bühne kommen evtl. Teaser für Gesundheit & Pflege.",
+    "notes":"Das ist eine Notiz",
     "content":{
         "sourceUrl":[
             ""]
@@ -17,15 +17,16 @@
     },
     "subPages": [
         {
-			"name":"Gesundheit & Pflege",
-			"url": "gesundheit-pflege",
+			"name":"Test - Name der Seite",
+			"url": "test-name-der-seite",
 			"menu": true,
 			"tracking":"",
 			"vanity":"",
 			"notes":"",
 			"content":{
 				"sourceUrl":[
-					"https://www.central.de/produkte/vollversicherung/"]
+					"https://www.central.de/produkte/vollversicherung/fuer-selbststaendige-und-arbeitnehmer/komfortschutz/"
+				]
 			},
 			"template":"Verteiler",
 			"redirects":{

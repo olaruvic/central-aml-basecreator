@@ -7,6 +7,7 @@ export enum ParagraphContentPrimitiveType {
 	text = 'text',
 	strong = 'strong',
 	sup = 'sup',
+	em = 'em', 			// <=> italic
 	img = 'img',
 	br = 'br',
 	link = 'link',
@@ -18,7 +19,7 @@ export class ParagraphContent
 	type_primitive: ParagraphContentPrimitiveType
 	isPrimitive: boolean
 	text: string|null = null
-	img_src: Array<string>|null = null
+	images: Array<ContentImage>|null = null
 	href: string|null = null
 	href_absolute: string|null = null
 	className: string|null = null
@@ -33,12 +34,9 @@ export class ParagraphContent
 	getImages(): Array<ContentImage>
 	{
 		let result = []
-		if ( typeof(this.img_src)!='undefined' && this.img_src!=null )
+		if ( typeof(this.images)!='undefined' && this.images!=null && this.images.length>0 )
 		{
-			for (let each of this.img_src)
-			{
-				result.push( new ContentImage(this.img_src) )
-			}
+			result = result.concat( this.images )
 		}
 		return result
 	}
@@ -64,6 +62,13 @@ export class ParagraphContent
 		return res
 	}
 
+	static initEmText($: any, tag: any): ParagraphContent
+	{
+		let res = new ParagraphContent(ParagraphContentPrimitiveType.em)
+			res.text = $(tag).text().trim()
+		return res
+	}
+
 	static initLineBreak($: any, tag: any): ParagraphContent
 	{
 		let res = new ParagraphContent(ParagraphContentPrimitiveType.br)
@@ -81,8 +86,8 @@ export class ParagraphContent
 			{
 				res.className = cls.trim()
 			}
-			if ( res.img_src == null ) res.img_src = [];
-			res.img_src = res.img_src.concat( tmp_img.url );
+			if ( res.images == null ) res.images = [];
+			res.images.push( tmp_img );
 		return res
 	}
 
@@ -118,8 +123,8 @@ export class ParagraphContent
 						if ( each.name == 'img' )
 						{
 							let tmp_img = ContentImage.init(currentUrl, $, each);
-							if ( res.img_src == null ) res.img_src = [];
-							res.img_src = res.img_src.concat( tmp_img.url );
+							if ( res.images == null ) res.images = [];
+							res.images.push( tmp_img );
 						}
 						else if ( each.name == 'span' )
 						{

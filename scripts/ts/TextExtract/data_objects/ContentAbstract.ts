@@ -11,7 +11,8 @@ export enum ContentType {
 	iframe = "iframe",
 	tab_group = "tab.group",			// central only
 	tab = "tab",						// central only
-	teaser = "teaser",					// central only
+	teaser_central = "teaser.central",
+	teaser_amv = "teaser.amv",
 }
 
 export class ContentAbstract

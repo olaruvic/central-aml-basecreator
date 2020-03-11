@@ -9,6 +9,7 @@ const ContentArticleDataOrderedList_1 = require("./ContentArticleDataOrderedList
 const ContentArticleDataTooltip_1 = require("./ContentArticleDataTooltip");
 var ParagraphContentType;
 (function (ParagraphContentType) {
+    ParagraphContentType["section_subtitle"] = "section_subtitle";
     ParagraphContentType["text"] = "text";
     ParagraphContentType["footnote"] = "footnote";
     ParagraphContentType["table_data"] = "table_data";
@@ -34,6 +35,12 @@ class ContentArticleDataParagraph extends ContentArticleDataAbstract_1.ContentAr
             return;
         }
         if (typeof (this.className) == 'undefined' || this.className == null) {
+            this.paragraphType = ParagraphContentType.text;
+        }
+        else if (/section-subtitle/i.test(this.className)) {
+            this.paragraphType = ParagraphContentType.section_subtitle;
+        }
+        else if (/(stage-slide-description|MsoNoSpacing|MsoNormal)/.test(this.className)) {
             this.paragraphType = ParagraphContentType.text;
         }
         else if (/footnote/.test(this.className)) {
@@ -71,6 +78,9 @@ class ContentArticleDataParagraph extends ContentArticleDataAbstract_1.ContentAr
                             break;
                         case 'sup':
                             this.textComponents.push(ParagraphContent_1.ParagraphContent.initSupText($, each));
+                            break;
+                        case 'em':
+                            this.textComponents.push(ParagraphContent_1.ParagraphContent.initEmText($, each));
                             break;
                         case 'br':
                             this.textComponents.push(ParagraphContent_1.ParagraphContent.initLineBreak($, each));

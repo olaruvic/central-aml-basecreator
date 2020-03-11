@@ -5,7 +5,7 @@ const Debug_1 = require("../../Debug/Debug");
 const ContentAbstract_1 = require("./ContentAbstract");
 const ContentArticle_1 = require("./ContentArticle");
 const ParagraphContent_1 = require("./ParagraphContent");
-class ContentTeaser extends ContentAbstract_1.ContentAbstract {
+class ContentTeaser_central extends ContentAbstract_1.ContentAbstract {
     constructor(className) {
         super(ContentAbstract_1.ContentType.teaser);
         this.className = className;
@@ -16,7 +16,7 @@ class ContentTeaser extends ContentAbstract_1.ContentAbstract {
     }
     static init(url, $, tag) {
         const tagObj = $(tag);
-        let result = new ContentTeaser(tagObj.prop('class'));
+        let result = new ContentTeaser_central(tagObj.prop('class'));
         result._parse(url, $, tag);
         return result;
     }
@@ -192,4 +192,4 @@ class ContentTeaser extends ContentAbstract_1.ContentAbstract {
         }
     }
 }
-exports.ContentTeaser = ContentTeaser;
+exports.ContentTeaser_central = ContentTeaser_central;

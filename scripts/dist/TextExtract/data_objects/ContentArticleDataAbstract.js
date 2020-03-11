@@ -5,9 +5,11 @@ const Debug_1 = require("../../Debug/Debug");
 var ArticleContentType;
 (function (ArticleContentType) {
     ArticleContentType["title"] = "title";
+    ArticleContentType["title_h1"] = "title.h1";
     ArticleContentType["title_h2"] = "title.h2";
     ArticleContentType["title_h3"] = "title.h3";
     ArticleContentType["title_h4"] = "title.h4";
+    ArticleContentType["title_h5"] = "title.h5";
     ArticleContentType["paragraph"] = "paragraph";
     ArticleContentType["ul"] = "ul";
     ArticleContentType["ol"] = "ol";

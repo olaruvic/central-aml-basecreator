@@ -19,6 +19,12 @@ export class ContentArticleDataTitleHx extends ContentArticleDataAbstract
 		return []
 	}
 
+	static init_h1($: any, tag: any): ContentArticleDataTitleHx
+	{
+		const o = $(tag)
+		return new ContentArticleDataTitleHx(ArticleContentType.title_h1, o.text(), o.prop('class'))
+	}
+
 	static init_h2($: any, tag: any): ContentArticleDataTitleHx
 	{
 		const o = $(tag)
@@ -35,5 +41,11 @@ export class ContentArticleDataTitleHx extends ContentArticleDataAbstract
 	{
 		const o = $(tag)
 		return new ContentArticleDataTitleHx(ArticleContentType.title_h4, o.text(), o.prop('class'))
+	}
+
+	static init_h5($: any, tag: any): ContentArticleDataTitleHx
+	{
+		const o = $(tag)
+		return new ContentArticleDataTitleHx(ArticleContentType.title_h5, o.text(), o.prop('class'))
 	}
 }

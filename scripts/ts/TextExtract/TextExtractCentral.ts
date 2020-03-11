@@ -8,17 +8,18 @@ const _url = require('url')
 import { FileSystem } from '../FileSystem/FileSystem'
 import { stringToFile } from '../StringToFile/stringToFile'
 import { fileToString } from '../FileToString/fileToString'
+import { Debug } from '../Debug/Debug'
 import { ContentTitle_central } from './data_objects/ContentTitle_central';
 import { ContentArticle } from './data_objects/ContentArticle';
 import { ContentImage } from './data_objects/ContentImage';
 import { ContentAccordeon } from './data_objects/ContentAccordeon';
 import { ContentIFrame } from './data_objects/ContentIFrame';
 import { ContentTabGroup } from './data_objects/ContentTabGroup';
-import { ContentTeaser } from './data_objects/ContentTeaser';
+import { ContentTeaser_central } from './data_objects/ContentTeaser_central';
 import { ParagraphContent } from './data_objects/ParagraphContent';
 import { ContentArticleDataTitleHx } from './data_objects/ContentArticleDataTitleHx';
-import { Debug } from '../Debug/Debug'
-import { ENGINE_METHOD_DIGESTS } from 'constants'
+import { ContentStage } from './data_objects/ContentStage'
+import { ContentArticleDataParagraph } from './data_objects/ContentArticleDataParagraph';
 // const pdf = require('pdf-parse')
 // const glob = require("glob")
 const cheerio = require('cheerio')
@@ -377,7 +378,7 @@ process.exit(1);
 					{
 						const txt_maxLen = 30;
 						const txt = $(each_tag).text().trim().replace(/[\n\r]+/, '');
-						console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #5")} :: type=[${each_tag.type}] name=[${each_tag.name}] class=[${$(each_tag).prop('class')}] text=[${txt.substr(0, txt_maxLen)}${txt.length>txt_maxLen?"...":""}]`);
+						console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #5")} :: type=[${each_tag.type}] name=[${each_tag.name}] id=[${tagObj.prop('id')}] class=[${$(each_tag).prop('class')}] text=[${txt.substr(0, txt_maxLen)}${txt.length>txt_maxLen?"...":""}]`);
 					}
 					break;
 				
@@ -385,7 +386,7 @@ process.exit(1);
 					{
 						const txt_maxLen = 30;
 						const txt = $(each_tag).text().trim().replace(/[\n\r]+/, '');
-						console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #6")} :: type=[${each_tag.type}] name=[${each_tag.name}] class=[${cls}] text=[${txt.substr(0, txt_maxLen)}${txt.length>txt_maxLen?"...":""}]`);
+						console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #6")} :: type=[${each_tag.type}] name=[${each_tag.name}] id=[${tagObj.prop('id')}] class=[${cls}] text=[${txt.substr(0, txt_maxLen)}${txt.length>txt_maxLen?"...":""}]`);
 					}
 					break;
 			}
@@ -397,16 +398,31 @@ process.exit(1);
 		// console.log(`${colors.magenta(new Debug().shortInfo())} :: type=[${tag.type}] name=[${tag.name}] class=[${$(tag).prop('class')}]`);
 		for( let each_tag of tag.children )
 		{
-			const cls = $(each_tag).prop('class');
 			const tagObj = $(each_tag);
+			const cls = tagObj.prop('class');
+			const tag_id = tagObj.prop('id');
 			switch ( each_tag.type )
 			{	
 				case 'text': 
-					/* ignore whitespaces */ 
+				case 'style':
+				case 'script':
+					// ignore whitespaces
 					break;
 				
 				case 'tag':
-					if ( /rte-content/i.test(cls) )
+					if ( /(module-video|form-collapsible|module-persona)/i.test(cls) )
+					{
+						// ignore
+					}
+					else if ( /(panel)/i.test(cls) )		// Bsp: pclass="panel panel-body richText richTextIndent"
+					{
+						// ignore
+					}
+					else if ( typeof(tag_id)!='undefined' && tag_id.trim().length>0 && (typeof(cls)=='undefined' || cls==null) )	// if id!=null && id.length>0 && cls==null
+					{
+						// ignore ... kommt vor bei form-Tags - cheerio scheint damit nicht zurecht zu kommen; werden als div interpretiert
+					}
+					else if ( /rte-content/i.test(cls) )
 					{
 						// this._parse_content_block(url, $, each_tag, result);
 						result.push( ContentArticle.init(url, $, each_tag) );
@@ -421,7 +437,7 @@ process.exit(1);
 					}
 					else if ( /teaser/i.test(cls) )
 					{
-						result.push( ContentTeaser.init(url, $, each_tag) );
+						result.push( ContentTeaser_central.init_central(url, $, each_tag) );
 					}
 					else if ( /module-image/i.test(cls) )
 					{
@@ -429,17 +445,29 @@ process.exit(1);
 					}
 					else if ( /section-subtitle/i.test(cls) )
 					{
-						result.push( ContentArticle.init(url, $, each_tag.parent) );
+						// result.push( ContentArticle.init(url, $, each_tag.parent) );
+						result.push( ContentArticleDataParagraph.init(url, $, each_tag, false) );
 					}
 					else if ( /module-collapsible/i.test(cls) )
 					{
 						this._parse_module_collapsible(url, $, each_tag, result);
 					}
+					else if ( /h2/i.test(each_tag.name) )
+					{
+						result.push( ContentArticleDataTitleHx.init_h2($, each_tag) )
+					}
+					else if ( /btn/i.test(cls) )
+					{
+						result.push( ParagraphContent.initLink(url, $, each_tag) )
+					}
 					else
 					{
+						// console.dir(each_tag, {colors: true, depth: 5})
+						// console.dir(tagObj.find('.form-panel').length)
+						// process.exit(1)
 						const txt_maxLen = 30;
 						const txt = $(each_tag).text().trim().replace(/[\n\r]+/, '');
-						console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #7")} :: type=[${each_tag.type}] name=[${each_tag.name}] class=[${$(each_tag).prop('class')}] text=[${txt.substr(0, txt_maxLen)}${txt.length>txt_maxLen?"...":""}]`);
+						console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #7")} :: type=[${each_tag.type}] id=[${tagObj.prop('id')}] name=[${each_tag.name}] class=[${$(each_tag).prop('class')}] text=[${txt.substr(0, txt_maxLen)}${txt.length>txt_maxLen?"...":""}]`);
 					}
 					break;
 				
@@ -447,7 +475,7 @@ process.exit(1);
 					{
 						const txt_maxLen = 30;
 						const txt = $(each_tag).text().trim().replace(/[\n\r]+/, '');
-						console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #8")} :: type=[${each_tag.type}] name=[${each_tag.name}] class=[${cls}] text=[${txt.substr(0, txt_maxLen)}${txt.length>txt_maxLen?"...":""}]`);
+						console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #8")} :: type=[${each_tag.type}] id=[${tagObj.prop('id')}] name=[${each_tag.name}] class=[${cls}] text=[${txt.substr(0, txt_maxLen)}${txt.length>txt_maxLen?"...":""}]`);
 					}
 					break;
 			}
@@ -680,13 +708,15 @@ process.exit(1);
 				case 'text': /* ignore */ break;
 
 				case 'tag':
-					// if ( /module-stage/i.test(cls) )
-					// {
-					// }
-					// else if ( /page-grid/i.test(cls) )
-					// {
-					// }
-					// else
+					if ( /module-stage/i.test(cls) )
+					{
+						result.push( ContentStage.init(url, $, each_tag) );
+					}
+					else if ( /page-grid/i.test(cls) )
+					{
+						this._parse_homeContent_pageGrid(url, $, each_tag, result);
+					}
+					else
 					{
 						const txt_maxLen = 30;
 						const txt = $(each_tag).text().trim().replace(/[\n\r]+/, '');
@@ -698,10 +728,51 @@ process.exit(1);
 					{
 						const txt_maxLen = 30;
 						const txt = $(each_tag).text().trim().replace(/[\n\r]+/, '');
-						console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #19")} :: type=[${each_tag.type}] name=[${each_tag.name}] class=[${$(each_tag).prop('class')}]`);
+						console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #19")} :: type=[${each_tag.type}] name=[${each_tag.name}] class=[${cls}] text=[${txt.substr(0, txt_maxLen)}${txt.length>txt_maxLen?"...":""}]`);
 					}
 					break;
 			}
 		}
 	}
+
+	private _parse_homeContent_pageGrid(url: string, $: any, tag: any, result: Array<any>)
+	{
+		// console.log(`${colors.magenta(new Debug().shortInfo())} :: type=[${tag.type}] name=[${tag.name}] class=[${$(tag).prop('class')}]`);
+		for( let each_tag of tag.children )
+		{
+			const cls = $(each_tag).prop('class');
+			const tagObj = $(each_tag);
+			switch ( each_tag.type )
+			{
+				case 'text': /* ignore */ break;
+
+				case 'tag':
+					if ( /home-col/i.test(cls) )
+					{
+						this._parse_homeContent_pageGrid(url, $, each_tag, result);
+					}
+					else if ( /placement/i.test(cls) )
+					{
+						// this._parse_homeContent_pageGrid(url, $, each_tag, result);
+						this._parse_data_article(url, $, each_tag, result);
+					}
+					else
+					{
+						const txt_maxLen = 30;
+						const txt = $(each_tag).text().trim().replace(/[\n\r]+/, '');
+						console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #20")} :: type=[${each_tag.type}] name=[${each_tag.name}] class=[${cls}] text=[${txt.substr(0, txt_maxLen)}${txt.length>txt_maxLen?"...":""}]`);
+					}
+					break;
+
+				default:
+					{
+						const txt_maxLen = 30;
+						const txt = $(each_tag).text().trim().replace(/[\n\r]+/, '');
+						console.log(`${colors.magenta(new Debug().shortInfo())} :: ${colors.red("Unknown #21")} :: type=[${each_tag.type}] name=[${each_tag.name}] class=[${cls}] text=[${txt.substr(0, txt_maxLen)}${txt.length>txt_maxLen?"...":""}]`);
+					}
+					break;
+			}
+		}
+	}
+
 }

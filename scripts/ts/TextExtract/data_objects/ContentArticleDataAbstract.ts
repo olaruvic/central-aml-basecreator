@@ -5,9 +5,11 @@ import { ContentImage } from './ContentImage';
 
 export enum ArticleContentType {
 	title = "title",
+	title_h1 = "title.h1",					// central
 	title_h2 = "title.h2",					// central
 	title_h3 = "title.h3",					// central
 	title_h4 = "title.h4",					// central
+	title_h5 = "title.h5",					// central
 	paragraph = "paragraph",
 	ul = "ul",
 	ol  = "ol",

@@ -12,7 +12,8 @@ var ContentType;
     ContentType["iframe"] = "iframe";
     ContentType["tab_group"] = "tab.group";
     ContentType["tab"] = "tab";
-    ContentType["teaser"] = "teaser";
+    ContentType["teaser_central"] = "teaser.central";
+    ContentType["teaser_amv"] = "teaser.amv";
 })(ContentType = exports.ContentType || (exports.ContentType = {}));
 class ContentAbstract {
     constructor(type) {

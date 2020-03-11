@@ -13,6 +13,7 @@ const ContentImage_1 = require("./data_objects/ContentImage");
 const ContentAccordeon_1 = require("./data_objects/ContentAccordeon");
 const ContentIFrame_1 = require("./data_objects/ContentIFrame");
 const ContentArticleDataParagraph_1 = require("./data_objects/ContentArticleDataParagraph");
+const ContentTeaser_amv_1 = require("./data_objects/ContentTeaser_amv");
 const cheerio = require('cheerio');
 class TextExtractAMV {
     constructor(fpath_output_csv) {
@@ -200,21 +201,30 @@ class TextExtractAMV {
         }
     }
     _parse_section_tag(url, $, tag, result) {
+        let tagObj = $(tag);
+        let tag_id = tagObj.prop('id');
+        let cls = tagObj.prop('class');
         switch (tag.name) {
             case 'header':
                 result.push(ContentTitle_amv_1.ContentTitle_amv.init($, tag));
                 break;
             case 'div':
-                if (/am-rt/i.test($(tag).prop('class'))) {
+                if (/am-rt/i.test(cls)) {
                     result.push(ContentArticle_1.ContentArticle.init(url, $, tag));
                 }
-                else if (/accordiongrp/i.test($(tag).prop('class'))) {
+                else if (/accordiongrp/i.test(cls)) {
                     this._parse_accordeon_group(url, $, tag, result);
+                }
+                else if (/am-content-/i.test(cls)) {
+                    this._parse_teaser_group(url, $, tag, result);
+                }
+                else if ((typeof (tag_id) != 'undefined' && tag_id != null && tag_id.trim().length > 0)
+                    || ((typeof (tag_id) == 'undefined' || tag_id == null) && (typeof (cls) == 'undefined' || cls == null))) {
                 }
                 else {
                     const txt_maxLen = 30;
-                    const txt = $(tag).text().trim().replace(/[\n\r]+/, '');
-                    console.log(`${colors.magenta(new Debug_1.Debug().shortInfo())} :: ${colors.red("Unknown #2")} :: type=[${tag.type}] name=[${tag.name}] class=[${$(tag).prop('class')}] text=[${txt.substr(0, txt_maxLen)}${txt.length > txt_maxLen ? "..." : ""}]`);
+                    const txt = tagObj.text().trim().replace(/[\n\r]+/, '');
+                    console.log(`${colors.magenta(new Debug_1.Debug().shortInfo())} :: ${colors.red("Unknown #2")} :: type=[${tag.type}] id=[${tag_id}] name=[${tag.name}] class=[${cls}] text=[${txt.substr(0, txt_maxLen)}${txt.length > txt_maxLen ? "..." : ""}]`);
                 }
                 break;
             case 'img':
@@ -225,12 +235,15 @@ class TextExtractAMV {
                 break;
             case 'a':
             case 'nav':
+            case 'link':
+                break;
+            case 'section':
                 break;
             default:
                 {
                     const txt_maxLen = 30;
-                    const txt = $(tag).text().trim().replace(/[\n\r]+/, '');
-                    console.log(`${colors.magenta(new Debug_1.Debug().shortInfo())} :: ${colors.red("Unknown #3")} :: type=[${tag.type}] name=[${tag.name}] class=[${$(tag).prop('class')}] text=[${txt.substr(0, txt_maxLen)}${txt.length > txt_maxLen ? "..." : ""}]`);
+                    const txt = tagObj.text().trim().replace(/[\n\r]+/, '');
+                    console.log(`${colors.magenta(new Debug_1.Debug().shortInfo())} :: ${colors.red("Unknown #3")} :: type=[${tag.type}] name=[${tag.name}] class=[${cls}] text=[${txt.substr(0, txt_maxLen)}${txt.length > txt_maxLen ? "..." : ""}]`);
                 }
                 break;
         }
@@ -291,10 +304,6 @@ class TextExtractAMV {
         }
         if (typeof (title) == 'undefined' || title == null || title.length <= 0) {
             console.log(colors.red(`${colors.magenta(new Debug_1.Debug().shortInfo())} :: Error: <title> is empty! tag=[type=[${tag.type}] name=[${tag.name}] class=[${$(tag).prop('class')}]]`));
-            process.exit(1);
-        }
-        if (articles.length <= 0) {
-            console.log(colors.red(`${colors.magenta(new Debug_1.Debug().shortInfo())} :: Error: <article> not found or is empty! tag=[type=[${tag.type}] name=[${tag.name}] class=[${$(tag).prop('class')}]]`));
             process.exit(1);
         }
         result.push(new ContentAccordeon_1.ContentAccordeon(title, articles));
@@ -374,6 +383,58 @@ class TextExtractAMV {
                         const txt_maxLen = 30;
                         const txt = tagObj.text().trim().replace(/[\n\r]+/, '');
                         console.log(`${colors.magenta(new Debug_1.Debug().shortInfo())} :: ${colors.red("Unknown #9")} :: type=[${each.type}] name=[${each.name}] class=[${cls}] text=[${txt.substr(0, txt_maxLen)}${txt.length > txt_maxLen ? "..." : ""}]`);
+                    }
+                    break;
+            }
+        }
+    }
+    _parse_teaser_group(url, $, tag, result) {
+        for (let each of tag.children) {
+            let tagObj = $(each);
+            let cls = tagObj.prop('class');
+            switch (each.type) {
+                case 'text': break;
+                case 'tag':
+                    if (/am-content-teaser-link/i.test(cls)) {
+                        this._parse_teaser(url, $, each, result);
+                    }
+                    else {
+                        const txt_maxLen = 30;
+                        const txt = tagObj.text().trim().replace(/[\n\r]+/, '');
+                        console.log(`${colors.magenta(new Debug_1.Debug().shortInfo())} :: ${colors.red("Unknown #10 TAG")} :: type=[${each.type}] name=[${each.name}] class=[${cls}] text=[${txt.substr(0, txt_maxLen)}${txt.length > txt_maxLen ? "..." : ""}]`);
+                    }
+                    break;
+                default:
+                    {
+                        const txt_maxLen = 30;
+                        const txt = tagObj.text().trim().replace(/[\n\r]+/, '');
+                        console.log(`${colors.magenta(new Debug_1.Debug().shortInfo())} :: ${colors.red("Unknown #11")} :: type=[${each.type}] name=[${each.name}] class=[${cls}] text=[${txt.substr(0, txt_maxLen)}${txt.length > txt_maxLen ? "..." : ""}]`);
+                    }
+                    break;
+            }
+        }
+    }
+    _parse_teaser(url, $, tag, result) {
+        for (let each of tag.children) {
+            let tagObj = $(each);
+            let cls = tagObj.prop('class');
+            switch (each.type) {
+                case 'text': break;
+                case 'tag':
+                    if (/am-content-teaser/i.test(cls)) {
+                        result.push(ContentTeaser_amv_1.ContentTeaser_amv.init_amv(url, $, each));
+                    }
+                    else {
+                        const txt_maxLen = 30;
+                        const txt = tagObj.text().trim().replace(/[\n\r]+/, '');
+                        console.log(`${colors.magenta(new Debug_1.Debug().shortInfo())} :: ${colors.red("Unknown #12 TAG")} :: type=[${each.type}] name=[${each.name}] class=[${cls}] text=[${txt.substr(0, txt_maxLen)}${txt.length > txt_maxLen ? "..." : ""}]`);
+                    }
+                    break;
+                default:
+                    {
+                        const txt_maxLen = 30;
+                        const txt = tagObj.text().trim().replace(/[\n\r]+/, '');
+                        console.log(`${colors.magenta(new Debug_1.Debug().shortInfo())} :: ${colors.red("Unknown #13")} :: type=[${each.type}] name=[${each.name}] class=[${cls}] text=[${txt.substr(0, txt_maxLen)}${txt.length > txt_maxLen ? "..." : ""}]`);
                     }
                     break;
             }

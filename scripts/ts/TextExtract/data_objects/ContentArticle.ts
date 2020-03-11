@@ -94,6 +94,10 @@ export class ContentArticle extends ContentAbstract
 					}
 					break;
 				
+				case 'h1':
+					article.data.push( ContentArticleDataTitleHx.init_h1($, each) )
+					break;
+
 				case 'h2':
 					article.data.push( ContentArticleDataTitleHx.init_h2($, each) )
 					break;
@@ -104,6 +108,10 @@ export class ContentArticle extends ContentAbstract
 				
 				case 'h4':
 					article.data.push( ContentArticleDataTitleHx.init_h4($, each) )
+					break;
+				
+				case 'h5':
+					article.data.push( ContentArticleDataTitleHx.init_h5($, each) )
 					break;
 				
 				default:
