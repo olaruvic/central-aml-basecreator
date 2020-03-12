@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+	<script>
+		$(document).ready(function() {
+			$("img").each((i, e) => {
+				// create dummy image to get the original image size
+				$("<img>").attr("src", $(e).attr("src")).load(function(){
+					var imgObj = $(e);
+					var realWidth = this.width;
+					var realHeight = this.height;
+					// console.log("Original width=" + realWidth + ", " + "Original height=" + realHeight);
+					imgObj.attr("width", realWidth);
+					imgObj.attr("height", realHeight);
+					imgObj.parent('.gallery').children('.title').each((i, title_elem) => {
+						var title = $(title_elem);
+						var txt = title
+							.html()
+							.replace(/{%\s*width\s*%}/ig, realWidth)
+							.replace(/{%\s*height\s*%}/ig, realHeight)
+						title.html( txt );
+					})
+				});
+			});
+		});
+	</script>
+	<style>
+		* {
+			font-family: sans-serif;
+		}
+
+		div.gallery {
+			display: block;
+			width: 960px;
+			border: 1px solid #ccc;
+			margin: 15px auto 0 auto;
+		}
+		
+		div.gallery img {
+			display: inline-block;
+			position: relative;
+			top: 0;
+			left: 50%;
+			transform: translateX(-50%);
+			max-width: 100%;
+			height: auto;
+			margin: 0 auto;
+			border: solid 1px #ccc;
+		}
+
+		div.title {
+			padding: 15px;
+			font-weight: bold;
+			text-align: center;
+			background: #c0c0c0;
+			color: #000;
+		}
+		div.title.is-global {
+			background: #f0c9c6;
+			color: #c5281c;
+		}
+	
+		div.img-description {
+			padding: 3px;
+			text-align: center;
+			font-weight: normal;
+			color: #000;
+			background: #eee;
+			/*margin-bottom: 1px;*/
+			border-bottom: solid 1px #fff;
+		}
+		div.img-description SPAN {
+			font-weight: bold;
+			color: #c5281c;
+			text-transform: uppercase;
+			display: inline-block;
+			margin-right: 15px;
+		}
+
+		div.source {
+			/*border-top: solid 1px #ccc;*/
+			padding: 15px;
+			text-align: center;
+		}
+
+		div.target {
+			/*border-top: solid 1px #ccc;*/
+			padding: 15px;
+			text-align: center;
+		}
+
+		div.source A,
+		div.target A {
+			text-decoration: none;
+			color: #000;
+		}
+		div.source A:hover,
+		div.target A:hover {
+			text-decoration: underline;
+			color: #c5281c;
+		}
+		div.source .title,
+		div.target .title
+		{
+			display: block;
+			color: #c5281c;
+			font-weight: bold;
+			text-transform: uppercase;
+			margin-bottom: 5px;
+		}
+
+		div.gallery:hover {
+			border: 1px solid #000;
+			/*background: #ffd9a1;*/
+			background: #eee;
+		}
+		div.gallery:hover img {
+			/*border: solid 1px #000;*/
+			border: solid 1px rgba(0,0,0, 0.0);
+		}
+
+		/*div.gallery:hover div.target,
+		div.gallery:hover div.source {
+			border-top: 1px solid #000;
+		}*/
+		div.gallery:hover div.title {
+			background: #000;
+			color: #fff;
+		}
+		div.gallery:hover div.title.is-global {
+			background: #c5281c;
+			color: #fff;
+		}
+		</style>
+</head>
+<body>
+{%img_blocks%}
+</body>
+</html>

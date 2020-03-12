@@ -103,11 +103,24 @@ class ContentImage extends ContentAbstract_1.ContentAbstract {
             for (let each_responsive_key in resImg) {
                 if (/\d+x\d/i.test(each_responsive_key) || /landscape_stage/i.test(each_responsive_key)) {
                     let images = resImg[each_responsive_key];
+                    let max_size = -100;
+                    let max_url = null;
                     for (let each_key in images) {
                         let each_src = images[each_key].trim();
-                        if (each_src.length > 0) {
+                        if (each_src.length <= 0)
+                            continue;
+                        let key_isNumber = /^\d+$/im.test(each_key);
+                        if (key_isNumber == true) {
+                            if (parseInt(each_key) >= max_size) {
+                                max_url = URL.resolve(currentUrl, each_src);
+                            }
+                        }
+                        else {
                             result.push(URL.resolve(currentUrl, each_src));
                         }
+                    }
+                    if (max_url != null) {
+                        result.push(max_url);
                     }
                 }
                 else {

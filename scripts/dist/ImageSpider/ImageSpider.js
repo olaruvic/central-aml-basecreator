@@ -3,8 +3,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const fs = require("fs");
 const fse = require("fs-extra");
 const path = require("path");
+const root = require("../../../root");
 const colors = require("colors");
 const Debug_1 = require("../Debug/Debug");
+const f2s = require("../FileToString/fileToString");
 const s2f = require("../StringToFile/stringToFile");
 let needle = require('needle');
 let cheerio = require('cheerio');
@@ -91,8 +93,6 @@ class ImageSpider {
         for (let each_path in url2path) {
             let page = url2path[each_path];
             let target_root_path = this._getTargetRootPath(page.url);
-            target_root_path;
-            testen;
             let global_images_targetPath = this._getGlobalImageTargetPath(page.url);
             for (let each_url of page.content.sourceUrl) {
                 let url = each_url.trim();
@@ -169,7 +169,8 @@ class ImageSpider {
         else {
             this.downloadImages_list = this._create_downloadImages_list();
             let url_data = this.url_list[0];
-            this.create_images_htmlFile(url_data);
+            this._create_imageDescriptionOverview_htmlFile(url_data);
+            this._create_imageOverview_htmlFile(url_data);
             this.downloadImages_enum_idx = 0;
             this.downloadImages_callback = function () {
             };
@@ -250,22 +251,131 @@ class ImageSpider {
         }
     }
     _create_downloadImages_list() {
+        console.log(`######################################################### INFO | _create_downloadImages_list`.red.bold);
         let result = [];
         for (let key in this.image_pool) {
             let data = this.image_pool[key];
             let download_data = data.download;
             if (data.sites.length > 1) {
                 download_data.isGlobal = true;
-                console.log(download_data.raw_image_url.magenta.bold);
+                console.log("global: ", download_data.raw_image_url.magenta.bold);
             }
             result.push(download_data);
         }
         return result;
     }
-    create_images_htmlFile(url_data) {
-        console.dir(url_data, { colors: true });
-        console.log(`${new Debug_1.Debug().shortInfo()} :: ${"NEEDS IMPLEMENTATION !!!!!!!!!".bold}`.bgRed.white);
-        process.exit(1);
+    _getPageData(source_url) {
+        return this.site_pool[source_url].url_data.page;
+    }
+    _create_imageDescriptionOverview_htmlFile(url_data) {
+        let tmpl_path = path.join(root(), 'scripts', 'ts', 'ImageSpider', 'templates', 'img_description_overview');
+        let listEntry_htmlBody = f2s.fileToString(path.join(tmpl_path, 'list_row.tmpl.html'));
+        let indexTmpl_htmlBody = f2s.fileToString(path.join(tmpl_path, 'index.tmpl.html'));
+        let ordered_list = [];
+        for (let eachImgKey in this.image_pool) {
+            let eachImgData = this.image_pool[eachImgKey];
+            ordered_list.push(eachImgData);
+        }
+        ordered_list.sort((a, b) => {
+            let a_fpath = this._get_imgTargetFilePath(a.download);
+            let b_fpath = this._get_imgTargetFilePath(b.download);
+            return (a_fpath > b_fpath
+                ? 1
+                : (a_fpath == b_fpath
+                    ? (a_fpath.length > b_fpath.length ? 1 : -1)
+                    : -1));
+        });
+        let html_content = "";
+        let num_images = Object.keys(this.image_pool).length;
+        let img_idx = 0;
+        for (let eachImgData of ordered_list) {
+            img_idx++;
+            let html_entry = listEntry_htmlBody + "";
+            let downloadData = eachImgData.download;
+            let tmp_root_path = url_data.target_root;
+            let img_fpath = this._get_imgTargetFilePath(downloadData);
+            img_fpath = img_fpath.replace(tmp_root_path, '');
+            if (/^[\/\\]/im.test(img_fpath)) {
+                img_fpath = img_fpath.substring(1);
+            }
+            html_entry = html_entry.replace(/{%\s*idx\s*%}/ig, img_idx.toString());
+            html_entry = html_entry.replace(/{%\s*url\s*%}/ig, `<a href="${img_fpath}" target="_blank">${img_fpath}</a>`);
+            let alt_tag = eachImgData.image.alt;
+            let title_tag = eachImgData.image.title;
+            let alt_value = (typeof (alt_tag) != 'undefined' && alt_tag != null && alt_tag.trim().length > 0
+                ? alt_tag
+                : "");
+            let title_value = (typeof (title_tag) != 'undefined' && title_tag != null && title_tag.trim().length > 0
+                ? title_tag
+                : "");
+            html_entry = html_entry.replace(/{%\s*alt\s*%}/ig, alt_value);
+            html_entry = html_entry.replace(/{%\s*title\s*%}/ig, title_value);
+            html_content += html_entry;
+        }
+        indexTmpl_htmlBody = indexTmpl_htmlBody.replace(/{%\s*num_entries\s*%}/i, num_images.toString());
+        indexTmpl_htmlBody = indexTmpl_htmlBody.replace(/{%\s*img_list\s*%}/i, html_content);
+        s2f.stringToFile(path.join(url_data.target_root, 'image_description_overview.html'), indexTmpl_htmlBody, true);
+    }
+    _create_imageOverview_htmlFile(url_data) {
+        let tmpl_path = path.join(root(), 'scripts', 'ts', 'ImageSpider', 'templates', 'img_overview');
+        let overviewTmpl_imgBlock = f2s.fileToString(path.join(tmpl_path, 'img_block.tmpl.html'));
+        let overviewTmpl_imgDescription = f2s.fileToString(path.join(tmpl_path, 'img_description.tmpl.html'));
+        let overviewTmpl_htmlBody = f2s.fileToString(path.join(tmpl_path, 'index.tmpl.html'));
+        let html_content = "";
+        let num_images = Object.keys(this.image_pool).length;
+        let img_idx = 0;
+        for (let eachImgKey in this.image_pool) {
+            img_idx++;
+            let eachImgData = this.image_pool[eachImgKey];
+            let downloadData = eachImgData.download;
+            let img_urlData = eachImgData.url_data;
+            let tmp_root_path = url_data.target_root;
+            let img_fpath = this._get_imgTargetFilePath(downloadData);
+            img_fpath = img_fpath.replace(tmp_root_path, '');
+            if (/^[\/\\]/im.test(img_fpath)) {
+                img_fpath = img_fpath.substring(1);
+            }
+            let img_fpath_comps = path.parse(img_fpath);
+            let img_html_block = overviewTmpl_imgBlock.replace(/{%\s*img_path\s*%}/ig, img_fpath);
+            img_html_block = img_html_block.replace(/{%\s*img_title\s*%}/ig, `${img_idx} / ${num_images} - ${img_fpath_comps.base} - {%width%}x{%height%}${downloadData.isGlobal ? " (global)" : ""}`);
+            img_html_block = img_html_block.replace(/{%\s*img_title_bg\s*%}/ig, (downloadData.isGlobal
+                ? 'is-global'
+                : ''));
+            let img_alt = "";
+            let alt_tag = eachImgData.image.alt;
+            let title_tag = eachImgData.image.title;
+            img_alt += (typeof (alt_tag) != 'undefined' && alt_tag != null && alt_tag.trim().length > 0
+                ? overviewTmpl_imgDescription.replace(/{%\s*tag\s*%}/im, 'alt').replace(/{%\s*img_description\s*%}/im, alt_tag)
+                : "");
+            img_alt += (typeof (title_tag) != 'undefined' && title_tag != null && title_tag.trim().length > 0
+                ? overviewTmpl_imgDescription.replace(/{%\s*tag\s*%}/im, 'title').replace(/{%\s*img_description\s*%}/im, title_tag)
+                : "");
+            if (img_alt.length <= 0) {
+                img_alt += overviewTmpl_imgDescription.replace(/{%\s*tag\s*%}/im, 'alt / title').replace(/{%\s*img_description\s*%}/im, "&lt;empty&gt;");
+            }
+            img_html_block = img_html_block.replace(/{%\s*img_description\s*%}/ig, img_alt);
+            let source_pool = {};
+            let target_pool = {};
+            for (let eachSource of eachImgData.sites) {
+                let pageData = this._getPageData(eachSource);
+                source_pool[eachSource] = 1;
+                target_pool[pageData.url] = pageData.name;
+            }
+            let sources = "";
+            for (let eachSourceKey in source_pool) {
+                sources += `<a href="${eachSourceKey}" target="_blank">${eachSourceKey}</a><br/>`;
+            }
+            img_html_block = img_html_block.replace(/{%\s*img_source\s*%}/ig, sources);
+            let targets = "";
+            for (let eachTargetUrl in target_pool) {
+                let eachTargetName = target_pool[eachTargetUrl];
+                targets += `<a href="${eachTargetUrl}" target="_blank">${eachTargetName}</a><br/>`;
+            }
+            img_html_block = img_html_block.replace(/{%\s*img_target\s*%}/ig, targets);
+            html_content += img_html_block;
+        }
+        overviewTmpl_htmlBody = overviewTmpl_htmlBody.replace(/{%\s*img_blocks\s*%}/ig, html_content);
+        s2f.stringToFile(path.join(url_data.target_root, 'image_overview.html'), overviewTmpl_htmlBody, true);
     }
     _download_next_image() {
         if (this.downloadImages_enum_idx < this.downloadImages_list.length) {
@@ -274,7 +384,7 @@ class ImageSpider {
             this.downloadImages_enum_idx += 1;
             switch (nextImg.source_type) {
                 case ImageDownloadDataSourceType.img:
-                    this._copyImage(nextImg.isGlobal, nextImg.global_target_path, nextImg.source_url, nextImg.source_type_str, nextImg.raw_image_url, nextImg.image_name_ext, nextImg.origin, nextImg.target_path, nextImg.target_path_subdir, function () {
+                    this._copyImage(nextImg, function () {
                         _this._download_next_image();
                     });
                     break;
@@ -310,27 +420,36 @@ class ImageSpider {
         let imageURL = origin.replace(/[\/\\]$/i, '') + '/' + href.replace(/^[\/\\]/i, '');
         return imageURL;
     }
-    _copyImage(isGlobal, global_target_path, source_url, source_type, raw_image_url, image_name_ext, origin, target_path, target_path_subdir, callback) {
-        let imageURL = this._checkAndFormatLocalURL(raw_image_url, origin);
+    _get_imgTargetPath(downloadData) {
+        let full_targetPath = (downloadData.isGlobal == true
+            ? downloadData.global_target_path
+            : (typeof (downloadData.target_path_subdir) != 'undefined' && downloadData.target_path_subdir != null && downloadData.target_path_subdir.trim().length > 0
+                ? path.join(downloadData.target_path, downloadData.target_path_subdir)
+                : downloadData.target_path));
+        return full_targetPath;
+    }
+    _get_imgTargetFilePath(downloadData) {
+        let img_fpath = this._get_imgTargetPath(downloadData);
+        let imageURL = this._checkAndFormatLocalURL(downloadData.raw_image_url, downloadData.origin);
         let comps = path.parse(imageURL);
         let image_fname = decodeURIComponent(comps.base);
-        if (typeof (image_name_ext) != 'undefined' && image_name_ext != null) {
+        if (typeof (downloadData.image_name_ext) != 'undefined' && downloadData.image_name_ext != null) {
             let comps_fname = path.parse(image_fname);
-            image_fname = comps_fname.name + '---' + image_name_ext + comps_fname.ext;
+            image_fname = comps_fname.name + '---' + downloadData.image_name_ext + comps_fname.ext;
         }
-        let full_targetPath = (isGlobal == true
-            ? global_target_path
-            : (typeof (target_path_subdir) != 'undefined' && target_path_subdir != null && target_path_subdir.trim().length > 0
-                ? path.join(target_path, target_path_subdir)
-                : target_path));
+        return path.join(img_fpath, image_fname);
+    }
+    _copyImage(downloadData, callback) {
+        let imageURL = this._checkAndFormatLocalURL(downloadData.raw_image_url, downloadData.origin);
+        let full_targetPath = this._get_imgTargetPath(downloadData);
+        let image_targetPath = this._get_imgTargetFilePath(downloadData);
         if (fs.existsSync(full_targetPath) == false) {
             fse.ensureDirSync(full_targetPath);
         }
-        let image_targetPath = path.join(full_targetPath, image_fname);
         needle.get(imageURL, { output: image_targetPath }, function (err, resp, body) {
-            console.log(`-------- source${colors.yellow(source_type)} =`, colors.grey(imageURL));
+            console.log(`-------- source${colors.yellow(downloadData.source_type_str)} =`, colors.grey(imageURL));
             if (!err) {
-                console.log(`         target${colors.yellow(source_type)} = ${colors.green(image_targetPath)}`);
+                console.log(`         target${colors.yellow(downloadData.source_type_str)} = ${colors.green(image_targetPath)}`);
             }
             else {
                 console.log(colors.bgRed.white('############################## Error'));
